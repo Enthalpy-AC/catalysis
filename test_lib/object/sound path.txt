@@ -1,0 +1,2 @@
+//Definition//Def6
+{"places":[0],"popups":[0],"scenes":[0],"profiles":[0],"evidence":[0],"scenes_aai":[0],"music":[0],"cross_examinations":[0],"frames":[0],"ui":{"base":"classic","elements":[]},"sounds":[0,{"id":1,"name":"","path":"fake_sound","external":true,"volume":100}]}

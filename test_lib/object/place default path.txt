@@ -1,0 +1,2 @@
+//Definition//Def6
+{"places":[0,{"foreground_objects":[{"name":"Judge Bench","image":"http://aceattorney.sparklin.org/Ressources/Images/defaultplaces/foreground_objects/aj_judge_bench.gif","external":1,"y":0,"x":0,"hidden":0,"id":1}],"name":"","positions":[],"background_objects":[],"background":{"image":"../defaultplaces/backgrounds/aj_judge","hidden":false,"external":false},"id":1}],"popups":[0],"scenes":[0],"profiles":[0],"evidence":[0],"scenes_aai":[0],"music":[0],"cross_examinations":[0],"frames":[0],"ui":{"base":"classic","elements":[]},"sounds":[0]}

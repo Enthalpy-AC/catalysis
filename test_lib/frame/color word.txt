@@ -1,0 +1,2 @@
+//Definition//Def6
+{"places":[0],"popups":[0],"scenes":[0],"profiles":[0],"evidence":[0],"scenes_aai":[0],"music":[0],"cross_examinations":[0],"frames":[0,{"sound":0,"speaker_voice":-4,"place_position":0,"characters_erase_previous":false,"place_transition":0,"popups":[],"text_colour":"red","text_speed":1,"action_parameters":[],"action_name":"","hidden":false,"wait_time":0,"merged_to_next":false,"text_content":"","music":0,"characters":[],"place":0,"speaker_id":-3,"speaker_use_name":false,"id":1,"speaker_name":""}],"ui":{"base":"classic","elements":[]},"sounds":[0]}

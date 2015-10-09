@@ -1,0 +1,2 @@
+//Definition//Def6
+{"places":[0,{"id":1,"name":"","background":{"image":"Ace Attorney 1/BureauDePhoenix","external":false,"hidden":false},"positions":[],"background_objects":[],"foreground_objects":[{"id":1,"name":"","image":"","external":1,"hidden":0,"x":0,"y":0}]}],"popups":[0],"scenes":[0],"profiles":[0],"evidence":[0],"scenes_aai":[0],"music":[0],"cross_examinations":[0],"frames":[0],"ui":{"base":"classic","elements":[]},"sounds":[0]}

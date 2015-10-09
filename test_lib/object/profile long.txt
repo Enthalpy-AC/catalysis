@@ -1,0 +1,2 @@
+//Definition//Def6
+{"places":[0],"popups":[0],"scenes":[0],"profiles":[0,{"id":1,"long_name":"Long Name","short_name":"","description":"","civil_status":"","hidden":false,"base":"Inconnu","icon":"","custom_sprites":[],"voice":-1,"auto_place_position":"","auto_place":"","auto_colour":""}],"evidence":[0],"scenes_aai":[0],"music":[0],"cross_examinations":[0],"frames":[0],"ui":{"base":"classic","elements":[]},"sounds":[0]}

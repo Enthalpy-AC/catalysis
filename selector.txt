@@ -1,0 +1,8 @@
+USERNAME:
+AAO_username_here
+PASSWORD:
+AAO_password_here
+DIRECTORY:
+first_directory
+TRIAL_ID:
+trial_id_number_here
