@@ -1,2 +1,2 @@
-Profile My_Profile {
+Popup {
 }
