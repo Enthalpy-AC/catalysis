@@ -250,10 +250,6 @@ class FrameParser(object):
         if self.executor.frame["merged_to_next"]:
             raise Invalid("terminal merge")
 
-        # We're ready to clear!
-        self.root.after_idle(self.root.destroy)
-        self.root.mainloop()
-
     def validate_context(self, command):
         '''Validate context. For example, some functions should never be
         called manually, should never be called on merged frames, or should
@@ -464,4 +460,8 @@ def parse_file(directory, template, suffix_dicts, object_dict, macro_dict,
     except Invalid:
         print sys.exc_info()[1].message.format("end of file", file_name)
         parser.terminate()
+
+	# Clear tkinter, even if the frame_data is blank.
+    parser.root.after_idle(parser.root.destroy)
+    parser.root.mainloop()
     return parser.executor.trial

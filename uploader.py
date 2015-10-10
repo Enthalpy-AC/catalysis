@@ -1,6 +1,5 @@
 '''Module to automate sending Catalysis data to AAO and opening the
 browser.'''
-from mechanize._mechanize import FormNotFoundError
 
 # Adapted from code by Ferdielance.
 
@@ -16,6 +15,7 @@ MY_BROWSER = "firefox"
 
 import re
 import mechanize
+from mechanize._mechanize import FormNotFoundError
 import webbrowser
 from urllib2 import HTTPError
 
