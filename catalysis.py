@@ -27,7 +27,7 @@ try:
     if not test_mode:
         directory, upload_dict = upload_parser.parse_file()
     else:
-    	directory = "test_lib"
+        directory = "test_lib"
     macro_dict, config_dict, auto_dict = macro_parser.parse_file(
         directory, macro_test)
     template, suffix_dicts, object_dict = (
@@ -51,18 +51,18 @@ if getattr(sys, 'frozen', False):
 open(output_file, "w").write('//Definition//Def6\n' + json_data)
 
 if not test_mode:
-	try:
-		upload_dict["trial_id"] = int(upload_dict["trial_id"])
-	except ValueError:
-		print "Choosing not to upload data..."
-	else:
-		print ("Choosing to upload data to trial {}. Press any key to " +
+    try:
+        upload_dict["trial_id"] = int(upload_dict["trial_id"])
+    except ValueError:
+        print "Choosing not to upload data..."
+    else:
+        print ("Choosing to upload data to trial {}. Press any key to " +
 		"continue.").format(
 			upload_dict["trial_id"])
-		raw_input(
+        raw_input(
 			"Alternately, exit to abort uploading while keeping a valid " +
 			"trial file.")
-		uploader.upload(upload_dict)
+        uploader.upload(upload_dict)
 
 print "Catalysis complete!"
 catalysis_globals.terminate()

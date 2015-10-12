@@ -461,7 +461,7 @@ def parse_file(directory, template, suffix_dicts, object_dict, macro_dict,
         print sys.exc_info()[1].message.format("end of file", file_name)
         parser.terminate()
 
-	# Clear tkinter, even if the frame_data is blank.
+    # Clear tkinter, even if the frame_data is blank.
     parser.root.after_idle(parser.root.destroy)
     parser.root.mainloop()
     return parser.executor.trial
