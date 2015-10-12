@@ -2414,6 +2414,11 @@ obj2 {
 wait, 9000
 }""", frame="obj")
 
+    def test_macro_no_override_non_func(self):
+        self.checkFile("no non func override", macro="""cross {
+wait, 100
+}""", frame="cross")
+
     def test_config_colon(self):
         self.checkError((2, "config colon"), macro="""CONFIG {
 test""")

@@ -118,15 +118,15 @@ class FrameParser(object):
 
         # Convert the first word to a functional name.
         lead_word = command_list.pop(0).strip().replace(r"\\", "\\")
-        lead_word = re.sub(
-            "([A-Z]+)", lambda match: "_" + match.group(1).lower(), lead_word)
 
-        # Assume it's a function and try to handle it.
-        try:
-            func = getattr(self.executor, lead_word)
-        except AttributeError:
-            pass
-        else:
+
+        # Assuming it's a Catalysis frame function, we need to transform the
+        # camelCase to an underscore_version.
+        func_name = re.sub(
+            "([A-Z]+)", lambda match: "_" + match.group(1).lower(), lead_word)
+        # The if checks if it is, in fact, a frame function.
+        if func_name in frame_library.method_names:
+            func = getattr(self.executor, func_name)
             self.validate_context(func)
             # Purge terminal underscores.
             command_list = [re.sub(
