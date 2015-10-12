@@ -958,9 +958,9 @@ class Library(object):
             try:
                 base_place = self.from_object_dict(
                     match, {"places"}, "Place with object")
-                return base_place.data["id"]
+                return str(base_place.data["id"])
             except Invalid:
-                return key_or_value(match, built_dict, "place")
+                return str(key_or_value(match, built_dict, "place"))
 
         self.frame["action_parameters"] = {"multiple": {"object": []}}
         parsed_exp = expression_pack(argv, mult_schema=(1, 3))["multiple"]
@@ -970,6 +970,8 @@ class Library(object):
         for place, subobj in parsed_exp:
             skip = False
             if place[0] == "val":
+                # If the first place isn't an expression, seek from the
+                # defined places, then the AAO built-ins.
                 try:
                     base_place = self.from_object_dict(
                         place[1], {"places"}, "Place with object")
@@ -982,6 +984,8 @@ class Library(object):
                     subobj = ["val", place[1], "foreground_objects", 1]
                     skip = True
             else:
+                # Otherwise, look for things that were between two newlines
+                # and replace those.
                 place[1] = re.sub(r"\n(.*)\n", place_replace, place[1])
             if subobj[0] == "val" and not skip:
                 try:
@@ -1525,10 +1529,13 @@ class Library(object):
                 {"expression": param(exp, 1), "cond_dest": param(frame, 1)})
 
 reserved_names = set()
+method_names = set()
 for n in inspect.getmembers(Library, predicate=inspect.ismethod):
     res_name = n[0]
     # Reserve the function names in underscore and camelCase mode.
     reserved_names.add(res_name)
     reserved_names.add(
         re.sub("_(.)", lambda match: match.group(1).upper(), res_name))
-
+    # Now add the name to the list of method names. When I get an attribute
+    # of the parser, I can compare against this to check if it is a method.
+    method_names.add(n[0])

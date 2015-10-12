@@ -1925,6 +1925,10 @@ name: my_obj
     def test_hideObj_exp(self):
         self.checkFile("hide object exp", frame="hideObj, $1, $2, 3, 4")
         
+    def test_revObj_exp(self):
+        self.checkFile("reveal object exp", obj="""Place street {
+}""", frame="revObj, $$street$, $$street$, 'foreground', 'object':")
+
     def test_hideObj_mixed_err(self):
         self.checkError((1, "exp dependency"), obj="""Place my_place {
 }
