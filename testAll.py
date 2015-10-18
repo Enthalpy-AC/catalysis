@@ -23,11 +23,16 @@ class TestCase(unittest.TestCase):
             return json.loads(data)
 
     def checkError(self, msg, macro="", obj="", frame =""):
+        '''Run the program, and assert that it raised the expected error.
+        Error is encoded as (line number or "end of file", error key from
+        catalysis_globals, any necessary arguments)'''
         location = "line {}".format(msg[0]) if isinstance(msg[0], int) else msg[0]
         msg = err_dict[msg[1]].format(*msg[2:])
         self.assertEqual(self.catalyze(macro, obj, frame), "Error on {} of {}: {}".format(location, self.filename, msg))
 
     def checkFile(self, filename, macro="", obj="", frame=""):
+        '''Run the program, assert that it worked, and compare the result file
+        with the file with name filename in the target folder.'''
         self.assertEqual(self.catalyze(macro, obj, frame), "Catalysis complete!")
         self.assertDictEqual(self.returnFile("test_lib/{}/{}.txt".format(self.folder, filename)), self.returnFile())
 
@@ -951,6 +956,10 @@ class Frame_Commands(FrameErrors):
         self.checkFile("popup", obj="""Popup Foo {
 }""", frame="popup, Foo")
         
+    def test_indent(self):
+        self.checkFile("popup", obj="""Popup Foo {
+}""", frame="    popup, Foo")
+
     def test_popup_not_obj(self):
         self.checkError((1, "unk obj", "Foo"), frame="popup, Foo")
         
