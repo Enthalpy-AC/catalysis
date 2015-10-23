@@ -149,8 +149,16 @@ class Profile(JSONRow):
                 index += 1
         self.last_method = False
 
-    def update_suffixes(self):
+    def update_suffixes(self, validate_prefix=True):
         '''Update the list of suffixes, performing validation as needed.'''
+
+        # Early-exit if there is no prefix. Otherwise, validate against
+        # duplicates if needed. The prefix is now confirmed valid.
+        if not self.character_prefix:
+            return
+        elif validate_prefix and self.character_prefix in self.suffix_dicts:
+            raise Invalid("prefix dupl", self.character_prefix)
+
         # Combine our lists of suffixes, to validate suffix uniqueness.
         values_list = self.custom_suffix_list + self.sprite_suffix.values()
         # Ensure suffix uniqueness.
@@ -166,13 +174,10 @@ class Profile(JSONRow):
             {suffix: - self.sprite_suffix.values().index(suffix) - 1
              for suffix in self.sprite_suffix.values()})
 
-        # Add the current suffix dict to the list, if there is such a dict.
-        if current_suffix_dict:
-            if self.character_prefix in self.suffix_dicts:
-                raise Invalid("prefix dupl", self.character_prefix)
-            self.suffix_dicts[self.character_prefix] = {
-                "id": self.data["id"], "suffix dict": current_suffix_dict,
-                "short": self.data["short_name"]}
+        # We can now add this to the dictionary of sprites.
+        self.suffix_dicts[self.character_prefix] = {
+            "id": self.data["id"], "suffix dict": current_suffix_dict,
+            "short": self.data["short_name"]}
 
 
 class Evidence(JSONRow):

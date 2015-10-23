@@ -55,6 +55,7 @@ class CustomSprite(JSONClass):
         if not self.parent_object.character_prefix:
             raise Invalid("suffix no prefix")
         self.parent_object.custom_suffix_list.append(suffix)
+        self.parent_object.update_suffixes(False)
 
 class EvidenceCheck(JSONClass):
     '''Abstract class for a piece of evidence's suboject.'''

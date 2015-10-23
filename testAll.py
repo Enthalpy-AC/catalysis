@@ -813,7 +813,21 @@ base: lisabasil
         self.checkFile("speaker syntax", obj="""Profile {
 base: lisabasil
 }""", frame="lb2")
-        
+
+    def test_speaker_syntax(self):
+        self.checkFile("speaker spriteless", obj="""Profile {
+base: dougswallow
+}""", frame="ds")
+
+    def test_speaker_syntax(self):
+        self.checkFile("custom sprite", obj="""Profile foo {
+base: dougswallow
+}
+
+foo sprite {
+suffix: bar
+}""", frame="ds.bar")
+
     def test_sprite_redefined_absolute(self):
         self.checkFile("custom suffix abs", obj="""Profile {
 base: lisabasil
