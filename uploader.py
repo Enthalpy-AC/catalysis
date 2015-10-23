@@ -26,7 +26,7 @@ def login_aao(upload_dict):
     this function should only be called once per session.'''
     br.open(LOGIN_URL)
     try:
-        br.select_form(nr=1000)
+        br.select_form(nr=0)
     except FormNotFoundError:
         print "Couldn't find login form on login page."
     br["username"] = upload_dict["username"]
@@ -42,7 +42,7 @@ def upload_data(directory, upload_dict):
     '''Upload trial data once logged in.'''
     br.open(SAVE_URL)
     br.select_form(nr=0)
-    br["trial_id"] = upload_dict["trial_id"]
+    br["trial_id"] = str(upload_dict["trial_id"])
     with open(directory + DATA_FILENAME, "r") as trial_file:
         trial_data = trial_file.read()
     br["trial_contents"] = trial_data
@@ -60,10 +60,10 @@ def upload_data(directory, upload_dict):
 # Open the browser with editor.
 # Note: This requires an AAO login with Firefox, not the mechanize Browser.
 # At bare minimum, Firefox needs the necessary cookies.
-def open_browser():
+def open_browser(upload_dict):
     '''Open the editor.'''
     browser_controller = webbrowser.get(MY_BROWSER)
-    browser_controller.open(EDITOR_URL_BASE + br["trial_id"])
+    browser_controller.open(EDITOR_URL_BASE + str(upload_dict["trial_id"]))
 
 def upload(directory, upload_dict):
     '''Login, upload the data, and open the case in-editor.'''
@@ -73,4 +73,4 @@ def upload(directory, upload_dict):
         print "Unable to login to AAO."
 
     upload_data(directory, upload_dict)
-    open_browser()
+    open_browser(upload_dict)

@@ -56,13 +56,14 @@ if not test_mode:
     except ValueError:
         print "Choosing not to upload data..."
     else:
-        print ("Choosing to upload data to trial {}. Press any key to " +
-		"continue.").format(
-			upload_dict["trial_id"])
+        print (
+            "Choosing to upload data to trial {}. Press enter to " +
+            "continue.").format(
+                upload_dict["trial_id"])
         raw_input(
-			"Alternately, exit to abort uploading while keeping a valid " +
-			"trial file.")
-        uploader.upload(upload_dict)
+            "Alternately, exit to abort uploading while keeping a valid " +
+            "trial file.")
+        uploader.upload(directory, upload_dict)
 
 print "Catalysis complete!"
 catalysis_globals.terminate()
