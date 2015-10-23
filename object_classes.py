@@ -39,11 +39,13 @@ class Profile(JSONRow):
     @property
     def key_to_method(self):
         '''Hashes attribute name to function.'''
-        return {"long": self.new_long, "short": self.new_short, "description":
+        return {
+            "long": self.new_long, "short": self.new_short, "description":
             self.new_descript, "metadata": self.new_civil, "hidden":
             self.set_hidden, "sprite": self.new_base, "icon": self.new_icon,
             "voice": self.set_voice, "base": self.base, "prefix":
-            self.set_character_prefix, "suffix": self.set_suffixes}
+            self.set_character_prefix, "suffix": self.set_suffixes
+        }
 
     def base(self, base):
         '''Run base. Prefix, being dependent on whether sprite is already run,
@@ -196,9 +198,11 @@ class Evidence(JSONRow):
     @property
     def key_to_method(self):
         '''Hashes attribute name to function.'''
-        return {"name": self.new_name, "description": self.new_descript,
+        return {
+            "name": self.new_name, "description": self.new_descript,
             "metadata": self.new_metadata, "hidden": self.set_hidden,
-            "icon": self.new_icon, "base": self.base}
+            "icon": self.new_icon, "base": self.base
+        }
 
     def new_name(self, name):
         '''Change the name.'''
@@ -283,9 +287,11 @@ class Music(JSONRow):
     @property
     def key_to_method(self):
         '''Hashes attribute name to function.'''
-        return {"name": self.new_name, "path": self.new_path,
+        return {
+            "name": self.new_name, "path": self.new_path,
             "volume": self.new_volume, "loop": self.new_loop_start,
-            "base": self.base}
+            "base": self.base
+        }
 
     def new_name(self, name):
         '''Change the name.'''
@@ -321,8 +327,10 @@ class Sound(JSONRow):
     @property
     def key_to_method(self):
         '''Hashes attribute name to function.'''
-        return {"name": self.new_name, "path": self.new_path,
-            "volume": self.new_volume, "base": self.base}
+        return {
+            "name": self.new_name, "path": self.new_path,
+            "volume": self.new_volume, "base": self.base
+        }
 
     def new_name(self, name):
         '''Change the name.'''
@@ -353,8 +361,8 @@ class Popup(JSONRow):
     @property
     def key_to_method(self):
         '''Hashes attribute name to function.'''
-        return {"name": self.new_name, "path": self.new_path,
-            "base": self.base}
+        return {
+            "name": self.new_name, "path": self.new_path, "base": self.base}
 
     def new_name(self, name):
         '''Change the name.'''

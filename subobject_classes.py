@@ -24,9 +24,11 @@ class CustomSprite(JSONClass):
     @property
     def key_to_method(self):
         '''Hashes attribute name to function.'''
-        return {"name": self.new_name, "still": self.new_still,
+        return {
+            "name": self.new_name, "still": self.new_still,
             "talk": self.new_talk, "startup": self.new_start,
-            "duration": self.set_duration, "suffix": self.set_suffix}
+            "duration": self.set_duration, "suffix": self.set_suffix
+        }
 
     def new_name(self, name):
         '''Property that defines the sprite's name.'''
@@ -122,9 +124,11 @@ class PlaceObject(JSONClass):
     @property
     def key_to_method(self):
         '''Hashes attribute name to function.'''
-        return {"name": self.new_name, "path": self.new_path,
+        return {
+            "name": self.new_name, "path": self.new_path,
             "hidden": self.set_hidden, "x": self.set_x, "y": self.set_y,
-            "base": self.base}
+            "base": self.base
+        }
 
     def new_name(self, name):
         '''Propery that sets the foreground/background object's name.'''
