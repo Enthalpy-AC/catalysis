@@ -34,10 +34,10 @@ class ObjectParser(object):
 
     def no_object(self, line):
         '''Handles parsing while not inside an object.'''
-        # Parse line as "word word(optional) {" else crash.
+        # Parse line as "word string(optional) {" else crash.
         try:
             object_type, name = re.match(
-                r"(\w+)\s*(\w+)?\s*\{$", line).groups()
+                r"(\w+)\s*(.+?)?\s*\{$", line).groups()
         except AttributeError:
             raise Invalid("expected_new_obj")
         # Assume it's calling an object. If that fails, move on.
@@ -54,6 +54,11 @@ class ObjectParser(object):
                 if name in object_classes.reserved_names:
                     raise Invalid("ban obj name", name)
                 self.using_objects[name] = self.active_object
+                if object_type.capitalize() == "Profile":
+                    self.active_object.redefine("long", name)
+                    self.active_object.redefine("short", name)
+                else:
+                    self.active_object.redefine("name", name)
             return self.in_object
         # Assume subobject, so names have to be flipped
         # around, and the second word is mandatory.

@@ -71,6 +71,10 @@ class ObjectPopups(ObjectErrors):
         self.checkFile("popup", obj="""Popup {
             }""")
         
+    def test_popup_specific(self):
+        self.checkFile("popup name", obj="""Popup My Popup {
+        }""")
+        
     def test_name(self):
         self.checkFile("popup name", obj="""Popup {
         name: My Popup
@@ -814,12 +818,12 @@ base: lisabasil
 base: lisabasil
 }""", frame="lb2")
 
-    def test_speaker_syntax(self):
+    def test_speaker_spriteless(self):
         self.checkFile("speaker spriteless", obj="""Profile {
 base: dougswallow
 }""", frame="ds")
 
-    def test_speaker_syntax(self):
+    def test_custom_sprite(self):
         self.checkFile("custom sprite", obj="""Profile foo {
 base: dougswallow
 }
@@ -973,6 +977,14 @@ class Frame_Commands(FrameErrors):
     def test_indent(self):
         self.checkFile("popup", obj="""Popup Foo {
 }""", frame="    popup, Foo")
+        
+    def test_popup_no_word(self):
+        self.checkFile("popup no word", obj="""Popup Foo Bar {
+}""", frame="popup, Foo Bar")
+        
+    def test_popup_escape(self):
+        self.checkFile("popup escape name", obj="""Popup Foo, Bar {
+}""", frame="popup, Foo\, Bar")
 
     def test_popup_not_obj(self):
         self.checkError((1, "unk obj", "Foo"), frame="popup, Foo")
@@ -1378,7 +1390,7 @@ ceStatement
 contra, obj, objectionable
 contra, kumquat, objectionable""")
             
-    def test_full_cross(self):
+    def test_contra_cross(self):
         self.checkFile("contra", obj="""Profile contradictory {
 }""", frame="""ceStart
 ceStatement, skip
