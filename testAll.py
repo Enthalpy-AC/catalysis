@@ -1168,7 +1168,7 @@ pPos, a""")
         self.checkFile("speaker name", frame="speakerName, foo")
         
     def test_speakerId_unk(self):
-        self.checkFile("speakerId ?", frame="speakerId, ?")
+        self.checkFile("speakerId unk", frame="speakerId, ?")
         
     def test_speakerId_null(self):
         self.checkFile("speakerId null", frame="speakerId")
