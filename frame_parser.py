@@ -68,7 +68,7 @@ class FrameParser(object):
             # It may not be safe to treat them as an escaped \ yet.
             #return {", ": "\n", r"\\": r"\\", "\\, ": ", "}[match]
             print("Matching...")
-            return {", ": "\n", r"\\": r"\\", "\\, ": ", ", r"\{": r"\{", r"\}" : r"\}", ", {" : ", $", "}" : "", "^, {" : ", {"}[match]
+            return {", ": "\n", r"\\": r"\\", "\\, ": ", ", r"\{": r"\{", r"\}" : r"\}", ", {" : ", $", "}" : "", "^, {" : ", $"}[match]
             #return {", ": "\n", r"\\": r"\\", "\\, ": ", ", r"\\{": "\{", r"\\}" : "\}", r"([^\\][{])" : "$", "}" : ""}[match]
 
         # First, split at a comma-space, preserving escape characters.
