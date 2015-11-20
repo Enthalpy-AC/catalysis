@@ -78,7 +78,7 @@ class FrameParser(object):
         print(line)
 		
         #command_list = re.sub(r"(\\\\|\\, |, )", func, line).split("\n")
-        command_list = re.sub(r"(\\\\|\\, |, |\{|\}|{|})", func, line).split("\n")
+        command_list = re.sub(r"(\\\\|\\, |, |\{|\}|{|})", func, line).split("\n") #This is the line we need to modify to have ,{ remain the same, but have { become a comma, basically
         print("Command list:")
         print(command_list)
 
