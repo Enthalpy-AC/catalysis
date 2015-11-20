@@ -67,12 +67,21 @@ class FrameParser(object):
             # Match \\ so they don't interfere with matching.
             # It may not be safe to treat them as an escaped \ yet.
             #return {", ": "\n", r"\\": r"\\", "\\, ": ", "}[match]
+            print("Matching...")
             return {", ": "\n", r"\\": r"\\", "\\, ": ", ", r"\{": r"\{", r"\}" : r"\}", "{" : "$", "}" : ""}[match]
+            #return {", ": "\n", r"\\": r"\\", "\\, ": ", ", r"\\{": "\{", r"\\}" : "\}", r"([^\\][{])" : "$", "}" : ""}[match]
 
 
         # First, split at a comma-space, preserving escape characters.
+
+        print("Line:")
+        print(line)
+		
         #command_list = re.sub(r"(\\\\|\\, |, )", func, line).split("\n")
         command_list = re.sub(r"(\\\\|\\, |, |\{|\}|{|})", func, line).split("\n")
+        print("Command list:")
+        print(command_list)
+
         # Seek a terminal colon, being wary of the possibility of escape.
         colon_match = re.search(r"(\\)*:$", command_list[-1])
         start_dialogue = False
@@ -128,6 +137,10 @@ class FrameParser(object):
         func_name = re.sub(
             "([A-Z]+)", lambda match: "_" + match.group(1).lower(), lead_word)
         # The if checks if it is, in fact, a frame function.
+        print("Commands are:")
+        print(command_list)
+        print("Func name is:")
+        print(func_name)
         if func_name in frame_library.method_names:
             func = getattr(self.executor, func_name)
             self.validate_context(func)
@@ -145,7 +158,10 @@ class FrameParser(object):
                 raise Invalid("bad arg num", lead_word)
 
         # Neither macros not characters should have been fragmented.
+        print("Command List:")
+        print(command_list)
         if command_list:
+            print("Sadface, I have commands")
             raise Invalid("unk line")
         # Assume it's a macro.
         try:
