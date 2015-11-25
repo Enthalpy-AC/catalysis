@@ -127,10 +127,6 @@ class FrameParser(object):
         func_name = re.sub(
             "([A-Z]+)", lambda match: "_" + match.group(1).lower(), lead_word)
         # The if checks if it is, in fact, a frame function.
-        print("Commands are:")
-        print(command_list)
-        print("Func name is:")
-        print(func_name)
         if func_name in frame_library.method_names:
             func = getattr(self.executor, func_name)
             self.validate_context(func)
@@ -148,10 +144,7 @@ class FrameParser(object):
                 raise Invalid("bad arg num", lead_word)
 
         # Neither macros not characters should have been fragmented.
-        print("Command List:")
-        print(command_list)
         if command_list:
-            print("Sadface, I have commands")
             raise Invalid("unk line")
         # Assume it's a macro.
         try:
