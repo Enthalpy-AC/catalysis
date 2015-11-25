@@ -66,7 +66,7 @@ class FrameParser(object):
             match = match.group(1)
             # Match \\ so they don't interfere with matching.
             # It may not be safe to treat them as an escaped \ yet.
-            if re.compile("[^, ]{").match(match) or re.compile("}[^, :]").match(match):
+            if re.compile("[^\\\, ]{").match(match) or re.compile("}[^, :]").match(match):
               return match
             return {", ": "\n", r"\\": r"\\", "\\, ": ", ", "\\{":"{", "\\}":"}", " {":"\n$", "{":"$", "}":""}[match]
 
