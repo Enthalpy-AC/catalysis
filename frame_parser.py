@@ -66,12 +66,13 @@ class FrameParser(object):
             match = match.group(1)
             # Match \\ so they don't interfere with matching.
             # It may not be safe to treat them as an escaped \ yet.
-            if re.compile("[^\\\, ]{").match(match) or re.compile("}[^, :]").match(match):
-              return match
-            return {", ": "\n", r"\\": r"\\", "\\, ": ", ", "\\{":"{", "\\}":"}", " {":"\n$", "{":"$", "}":""}[match]
+            return {", ": "\n", r"\\": r"\\", "\\, ": ", ",
+                    "\\{":"{", "\\}":"}", "{":"$", "}":""}[match]
 
-        # First, split at a comma-space, preserving escape characters.
-        command_list = re.sub(r"(\\\\|\\, |, |\\{|\\}|[^, ]{| ?{|}[^, :]|})", func, line).split("\n")
+        # Split at a comma-space and preserves escape characters,
+        # but replaces non-escaped "{" and "}" with "$" and "" respectively.
+        command_list = re.sub(r"(\\\\|\\, |, |\\{|\\}|{|})",
+                              func, line).split("\n")
         # Seek a terminal colon, being wary of the possibility of escape.
         colon_match = re.search(r"(\\)*:$", command_list[-1])
         start_dialogue = False
