@@ -60,9 +60,10 @@ class FrameParser(object):
         it. If the line ends with a colon, expect dialogue. Otherwise, expect a
         new command and do some data valdiation.'''
         def func(match):
-            r'''Function that handles escaping of comma-space and newline. Due
-            to expression syntax and the dialogue command, \ escape may not
-            be safe.'''
+            r'''Function that handles escaping of comma-space, curly brackets
+            and newline. Syntactical "{" are matched with "$", while "}" are 
+            removed. Due to expression syntax and the dialogue command, 
+            \ escape may not be safe.'''
             match = match.group(1)
             # Match \\ so they don't interfere with matching.
             # It may not be safe to treat them as an escaped \ yet.
