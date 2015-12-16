@@ -1057,8 +1057,7 @@ class Library(object):
             parent_dialogue = "val=0"
         if self.location == "sceLocks":
             # If we're in psyche locks, add a Back Button term.
-            schema = (1,) + schema
-            exp_parsed = expression_pack(argv, schema)
+            exp_parsed = expression_pack(argv, schema, back=True)
             in_locks = "val=true"
             lock_tuple = exp_parsed.pop(0)
             if lock_tuple[0] == "val":

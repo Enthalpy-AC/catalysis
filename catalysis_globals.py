@@ -203,7 +203,7 @@ err_dict = {
         "Arguments 4 and 5 must be greater than arguments 2 and 3, " +
         "respectively."
     ),
-    "schema fail": "Ran out of schema arguments at term {}.",
+    "schema fail": "Ran out of schema arguments at term {}.{}",
     "selector": "selector.txt expected this line to be {}.",
     "selector length": "selector.txt must have eight lines.",
     "subobj dne": "Subobject {} not recognized.",

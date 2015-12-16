@@ -1851,7 +1851,7 @@ class Anchors_Exp_Pack(FrameErrors):
 kumquat}""")
     
     def test_var_def(self):
-        self.checkError((2, "schema fail", 2), frame="""varDef
+        self.checkError((2, "schema fail", 2, ""), frame="""varDef
 1""")
     
     def test_global_excess(self):
@@ -2433,6 +2433,16 @@ my_ev, my_anc
 sceExam
 sceMove
 anc, my_anc""")
+
+    def test_askEv_lock_error(self):
+        self.checkError((7, "schema fail", 3, " An extra argument for the back button is required."), obj="""Evidence my_ev {
+}""", frame="""sceIntro
+sceMain
+
+sceTalk
+scePres
+sceLocks
+askEv, sealed, all""")
         
     def test_askEv_keyerr(self):
         self.checkError((1, "bad key", "kumquat", "Permissible evidence"), frame="""askEv, kumquat, my_anc

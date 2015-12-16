@@ -5,7 +5,7 @@ import re
 from catalysis_globals import Invalid
 from functools import wraps
 
-def expression_pack(arguments, schema, pad=False):
+def expression_pack(arguments, schema, pad=False, back=""):
     '''Returns one unit. A unit is all the information needed to fill one
     'section' of action_parameters. A unit consists of subunits, each of which
     stands for one GUI-selectable data point. A subunit is a list that starts
@@ -26,8 +26,14 @@ def expression_pack(arguments, schema, pad=False):
         if match.group(0) in {"{", "}"}:
             raise Invalid("dummy")
         return {r"\\": "\\", r"\}": "}", r"\{": "{"}[match.group()]
+
     arguments = list(arguments)
     unit = []
+
+    if back:
+        schema = (1,) + schema
+        back = " An extra argument for the back button is required."
+
     for i, subunit_len in enumerate(schema, start=1):
         subbed_args = []
         try:
@@ -75,7 +81,7 @@ def expression_pack(arguments, schema, pad=False):
                     raise Invalid("unescaped brace", arg)
                 unit.append(["val", arg])
         except IndexError:
-            raise Invalid("schema fail", i)
+            raise Invalid("schema fail", i, back)
     if arguments:
         raise Invalid("bad global arg num", len(arguments))
     return unit
