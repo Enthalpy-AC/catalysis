@@ -23,8 +23,11 @@ class Library(object):
         self.scene = self.trial["scenes"][-1]
         self.statement_index = -1
         self.pressable_indices = []
-        self.frame = {"merged_to_next": False, "action_parameters": {}}
+        self.frame = {"merged_to_next": False}
         self.location = ""
+        self.action_mult = {}
+        # talk and talk_sce are separate! Each talk anchor needs a related
+        # anchor for the scene, even if no global scene anchor has been made.
         self.anc_dict = {x: {"destination": set(), "value": {}} for x in {
             "frames", "scenes", "talk", "talk_sce"}}
         self.scene_dia = {}
@@ -33,6 +36,13 @@ class Library(object):
             is_object, object_dict=self.object_dict)
         self.from_object_dict.no_manual = True
         self.speaker_override = False
+
+    @no_manual
+    def check_ev(self, item):
+        '''Utility function to check if the item is a profile or
+        evidence.'''
+        return self.from_object_dict(
+            item, {"profiles", "evidence"}, self.action_mult["bad_ev_msg"])
 
     def null(self):
         '''Dummy function to create a blank frame.'''
@@ -89,27 +99,7 @@ class Library(object):
 
     def place(self, name=-1, position="center"):
         '''Set the place.'''
-        if name == -1:
-            self.frame["place"] = name
-        else:
-            try:
-                obj = self.from_object_dict(
-                    name, {"places"}, "Place to display"
-                )
-                self.frame["place"] = obj.data["id"]
-            except Invalid:
-                built_dict = {
-                    "black": -1, "pw bench": -2, "pw judge": -6,
-                    "pw counsel": -3, "pw court loud": -8,
-                    "pw court silent": -9, "pw lobby": -10,
-                    "pw det behind": -18, "pw det ahead": -19,
-                    "aj bench": -12, "aj judge": -14, "aj counsel": -13,
-                    "aj court loud": -15, "aj court silent": -16,
-                    "aj lobby": -17, "aj det behind": -20,
-                    "aj det ahead": -21, "power def": -4, "power pros": -5,
-                    "gavel 1": -7, "gavel 3": -11
-                }
-                self.frame["place"] = key_or_value(name, built_dict, "place")
+        self.frame["place"] = self.place_exp(["val", name], kill_exp=True)[1]
         if self.frame["characters"]:
             raise Invalid("place post char")
         pos_dict = {
@@ -651,31 +641,8 @@ class Library(object):
             raise Invalid("valid fail", "sceExam", self.location)
         self.scene_dia["end"] = self.frame["id"]
         self.make_frame()
-        if place:
-            place = self.from_object_dict(
-                place, {"places"}, "Place to examine")
-            place = place.data["id"]
-            # AAO does not support a pre-defined place here. See AAO Issue
-            # 108. Replace this if suite with the comment below once fixed.
-            # try:
-            #    place = self.from_object_dict(
-            #        place, {"places"}, "Place to examine")
-            #    place = place.data["id"]
-            # except Invalid:
-            #    built_dict = {
-            #        "black": -1, "pw bench": -2, "pw judge": -6,
-            #        "pw counsel": -3, "pw court loud": -8,
-            #        "pw court silent": -9, "pw lobby": -10,
-            #        "pw det behind": -18, "pw det ahead": -19,
-            #        "aj bench": -12, "aj judge": -14, "aj counsel": -13,
-            #        "aj court loud": -15, "aj court silent": -16,
-            #        "aj lobby": -17, "aj det behind":-20, "aj det ahead": -21,
-            #        "power def": -4, "power pros": -5, "gavel 1": -7,
-            #        "gavel 3": -11
-            #    }
-            #    place = key_or_value(place, built_dict, "place")
-        else:
-            place = 0
+        place = self.place_exp(
+            ["val", place], kill_exp=True)[1] if place else 0
         self.frame["action_name"] = "ExaminationExamine"
         self.frame["action_parameters"] = {"context": {"examination": {
             "scene_type": "val=scenes",
@@ -689,32 +656,15 @@ class Library(object):
         self.sce_exam_convo()
 
     @special
-    def sce_exam_convo(self, shape="", *argv):
+    def sce_exam_convo(self, *argv):
         '''Create the examination. Takes arguments for the area. You can only
         avoid arguments for the default.'''
         if self.location == "sceExamConvo":
             self.sce_exam_end()
-            if shape == "poly":
-                if len(argv) % 2:
-                    raise Invalid("poly pair")
-                if len(argv) < 6:
-                    raise Invalid("poly 6")
-            elif shape == "rect":
-                if len(argv) != 4:
-                    raise Invalid("rect 4")
-                if not (int(argv[2]) > int(argv[0]) and (
-                        int(argv[3]) > int(argv[1]))):
-                    raise Invalid("rect to quad 4")
-            elif shape == "circle":
-                if len(argv) != 3:
-                    raise Invalid("circle 3")
-            else:
-                raise Invalid("bad shape", shape)
-            for coord in argv[1:]:
-                int_at_least(coord, 0, "All arguments after polygon shape")
+            exam = self.exam_exp("val", argv[0], list(argv[1:]))[1]
             exam_dict = {
                 "start": self.frame["id"], "end": 0,
-                "area": shape + ":" + ",".join(argv)}
+                "area": exam}
         else:
             exam_dict = {"area": None, "start": self.frame["id"], "end": 0}
         self.location = "sceExamConvo"
@@ -772,134 +722,64 @@ class Library(object):
                 "scene_type": "scenes", "scene_id": i, "name_override": j})
         self.make_frame()
 
-    @action
-    def disp_ev(self, *argv):
+    @action({"type": "ev_pos", "bad_ev_msg": "Item to display"})
+    def disp_ev(self):
         '''Display evidence. Arguments are evidence name and position as
         coded.'''
-        def check_ev(item):
-            '''Utility function to check if the item is a profile or
-            evidence.'''
-            return self.from_object_dict(
-                item, {"profiles", "evidence"}, "Item to display")
-
         self.frame["action_name"] = "DisplayElements"
         self.frame["action_parameters"] = {"multiple": {"element": []}}
-        pos_dict = {"a": "auto", "tr": "topright", "tl": "topleft",
-                    "br": "bottomright", "bl": "bottomleft"}
-        parsed_exp = expression_pack(argv, mult_schema=(2, 1))
-        insert = self.frame["action_parameters"]["multiple"]["element"]
-        for evidence, pos in parsed_exp["multiple"]:
-            if evidence[0] == "val":
-                place = check_ev(evidence[1])
-                evidence = ("val", place.attribute, str(place.data["id"]))
-            else:
-                evidence[1] = re.sub(r"\n(.*)\n", (
-                    lambda m: check_ev(m.group(1)).atribute), evidence[1])
-                evidence[2] = re.sub(r"\n(.*)\n", (
-                    lambda m: check_ev(m.group(1)).data["id"]), evidence[2])
-            if pos[0] == "val":
-                pos[1] = key_or_value(
-                    pos[1], pos_dict, "evidence position", True)
-            for ele in insert:
-                if ele["position"] == param(pos, 1):
-                    raise Invalid("mult pos", pos[1])
-            insert.append({
-                "element_desc": {
-                    "type": param(evidence, 1), "id": param(evidence, 2)},
-                "position": param(pos, 1)
-            })
 
-    @no_manual
-    def set_unset_ev_helper(self, msg, *argv):
-        '''Helper function for setting and unsetting evidence. Handles the
-        action parameters.'''
-        def check_ev(item):
-            '''Utility function to check if the item is a profile or
-            evidence.'''
-            return self.from_object_dict(item, {"profiles", "evidence"}, msg)
-
-        self.frame["action_parameters"] = {"multiple": {"element": []}}
-        parsed_exp = expression_pack(argv, mult_schema=(2,))
-        insert = self.frame["action_parameters"]["multiple"]["element"]
-        for evidence, in parsed_exp["multiple"]:
-            if evidence[0] == "val":
-                place = check_ev(evidence[1])
-                evidence = ("val", place.attribute, str(place.data["id"]))
-            else:
-                evidence[1] = re.sub(r"\n(.*)\n", (
-                    lambda m: check_ev(m.group(1)).attribute), evidence[1])
-                evidence[2] = re.sub(r"\n(.*)\n", (
-                    lambda m: check_ev(m.group(1)).data["id"]), evidence[2])
-            insert.append({"element_desc": {
-                "type": param(evidence, 1), "id": param(evidence, 2)}})
-
-    @action
-    def hide_ev(self, *argv):
+    @action({"type": "ev", "bad_ev_msg": "Item to hide"})
+    def hide_ev(self):
         '''Hide evidence. Argument is evidence name.'''
         self.frame["action_name"] = "HideElements"
-        self.set_unset_ev_helper("Item to hide", *argv)
+        self.frame["action_parameters"] = {"multiple": {"element": []}}
 
-    @action
-    def rev_ev(self, *argv):
+    @action({"type": "ev", "bad_ev_msg": "Item to reveal"})
+    def rev_ev(self):
         '''Reveal evidence. Argument is evidence name.'''
         self.frame["action_name"] = "RevealElements"
-        self.set_unset_ev_helper("Item to display", *argv)
+        self.frame["action_parameters"] = {"multiple": {"element": []}}
 
     @no_manual
     def over_proceed_helper(self, *argv):
         '''Helper function for game overs and proceed to frame. Handles the
         action parameters.'''
-        parsed_exp = expression_pack(argv, global_schema=(1,))["global"][0]
+        frame, = expression_pack(argv, (1,))
         self.frame["action_parameters"] = {
             "context": {"not_merged": "val=true"},
-            "global": {"target": param(parsed_exp, 1)}}
-        self.anc_dict["frames"]["destination"].add((
-            "frames", self.frame["id"], "action_parameters", "global",
-            "target"
-        ))
+            "global": {"target": param(frame, 1)}}
+        self.frame_exp(("global", "target"))
 
     @merge_lock
-    @action
+    @action()
     def set_over(self, *argv):
         '''Make a game over redirect. Argument is an anchor.'''
         self.frame["action_name"] = "SetGameOver"
         self.over_proceed_helper(*argv)
 
     @merge_lock
-    @action
+    @action()
     def proceed(self, *argv):
         '''Make a proceed command. Argument is an anchor.'''
         self.frame["action_name"] = "GoTo"
         self.over_proceed_helper(*argv)
 
-    @no_manual
-    def hide_reveal_frame_helper(self, *argv):
-        '''Helper function for hiding and revealing frames. Handles the
-        action parameters.'''
-        self.frame["action_parameters"] = {"multiple": {"frame": []}}
-        parsed_exp = expression_pack(argv, mult_schema=(1,))
-        insert = self.frame["action_parameters"]["multiple"]["frame"]
-        for frame, in parsed_exp["multiple"]:
-            self.anc_dict["frames"]["destination"].add((
-                "frames", self.frame["id"], "action_parameters", "multiple",
-                "frame", len(insert), "target"))
-            insert.append({"target": param(frame, 1)})
-
-    @action
-    def hide_frame(self, *argv):
+    @action({"type": "frame"})
+    def hide_frame(self):
         '''Hide a frame. Arguments are anchors.'''
         self.frame["action_name"] = "HideFrame"
-        self.hide_reveal_frame_helper(*argv)
+        self.frame["action_parameters"] = {"multiple": {"frame": []}}
 
-    @action
-    def reveal_frame(self, *argv):
+    @action({"type": "frame"})
+    def reveal_frame(self):
         '''Reveal a frame. Arguments are anchors.'''
         self.frame["action_name"] = "RevealFrame"
-        self.hide_reveal_frame_helper(*argv)
+        self.frame["action_parameters"] = {"multiple": {"frame": []}}
 
     @merge_lock
-    @action
-    def game_over(self, dest, data="", part="", frame=""):
+    @action()
+    def game_over(self, *argv):
         '''End the game. First command tells which end state to go. If 'next'
         or 'another' end state, supply data-transfer type. If 'another,' also
         supply target part and frame IDs.'''
@@ -907,123 +787,73 @@ class Library(object):
         self.frame["action_parameters"] = {
             "context": {"not_merged": "val=true"}, "global": {"action": ""}}
         data_dict = {"none": "0", "var": "1", "full": "2"}
-        parsed_exp = expression_pack(
-            [dest, data, part, frame], (1, 1, 1, 1))["global"]
+        parsed_exp = expression_pack(argv, (1, 1, 1, 1), pad=True)
         insert = self.frame["action_parameters"]["global"]
+        # If we don't need all four variables...
         if all([x[0] == "val" for x in parsed_exp]) and (
                 parsed_exp[0][1] != "another"):
+            # End the game now is simple!
             if parsed_exp[0][1] == "end":
                 insert["action"] = "val=0"
+            # But if we go to the next part, which data transfers over?
             elif parsed_exp[0][1] == "next":
-                parsed_exp = parsed_exp[1]
-                if not parsed_exp[1]:
+                data = parsed_exp[1]
+                if not data[1]:
                     raise Invalid("arg missing", "Data to transfer")
-                parsed_exp[1] = key_or_value(
-                    parsed_exp[1], data_dict, "game over transfer data", True)
+                data[1] = key_or_value(
+                    data[1], data_dict, "game over transfer data", True)
                 insert["action"] = "val=1"
-                insert["data_transfer"] = param(parsed_exp, 1)
+                insert["data_transfer"] = param(data, 1)
+            # Any other case is a problem in the script.
             else:
                 raise Invalid("bad key", parsed_exp[0][1], "target part")
+        # If we do need all four variables...
         else:
+            # Let's rule out any bad types for the first argument...
             if parsed_exp[0][0] == "val" and parsed_exp[0][1] not in {
                     "end", "next", "another"}:
                 raise Invalid("bad key", parsed_exp[0][1], "target part")
-            else:
+            # ...and handle the good types now, unless we're in advanced mode.
+            elif parsed_exp[0][0] == "val":
                 proceed_dict = {"end": "0", "next": "1", "another": "2"}
                 parsed_exp[0] = (parsed_exp[0][0], key_or_value(
                     parsed_exp[0][1], proceed_dict, "proceed", True))
+            # We expect all data, so let's make sure we have it.
             if not parsed_exp[1][1]:
                 raise Invalid("arg missing", "Data to transfer")
             if not parsed_exp[2][1]:
                 raise Invalid("arg missing", "Target part")
             if not parsed_exp[3][1]:
                 raise Invalid("arg missing", "Target frame")
+            # Convert the data-to-transfer to a number...
             if parsed_exp[1][0] == "val":
                 parsed_exp[1][1] = key_or_value(
                     parsed_exp[1][1], data_dict, "game over transfer data",
                     True)
+            # And now we fill the insertion dict!
             insert["action"] = param(parsed_exp[0], 1)
             insert["data_transfer"] = param(parsed_exp[1], 1)
             insert["target_part"] = param(parsed_exp[2], 1)
             insert["target_frame"] = param(parsed_exp[3], 1)
 
-    @no_manual
-    def hide_rev_obj_helper(self, *argv):
-        '''Helper function for revealing and hiding objects. Handles the
-        action parameters.'''
-
-        def place_replace(match):
-            '''Replace place keywords with the place ID as needed.'''
-            match = match.group(1)
-            try:
-                base_place = self.from_object_dict(
-                    match, {"places"}, "Place with object")
-                return str(base_place.data["id"])
-            except Invalid:
-                return str(key_or_value(match, built_dict, "place"))
-
-        self.frame["action_parameters"] = {"multiple": {"object": []}}
-        parsed_exp = expression_pack(argv, mult_schema=(1, 3))["multiple"]
-        built_dict = {
-            "pw bench": -2, "pw judge": -6, "pw det behind": -18,
-            "aj bench": -12, "aj judge": -14, "aj det behind": -20}
-        for place, subobj in parsed_exp:
-            skip = False
-            if place[0] == "val":
-                # If the first place isn't an expression, seek from the
-                # defined places, then the AAO built-ins.
-                try:
-                    base_place = self.from_object_dict(
-                        place[1], {"places"}, "Place with object")
-                    place[1] = base_place.data["id"]
-                except Invalid:
-                    place = ["val", key_or_value(
-                        place[1], built_dict, "place")]
-                    # Place is a built-in. Mark "skip" because the subobject
-                    # needs no fixing.
-                    subobj = ["val", place[1], "foreground_objects", 1]
-                    skip = True
-            else:
-                # Otherwise, look for things that were between two newlines
-                # and replace those.
-                place[1] = re.sub(r"\n(.*)\n", place_replace, place[1])
-            if subobj[0] == "val" and not skip:
-                try:
-                    layer, sub_id = find_subobject(
-                        {"foreground_objects", "background_objects"},
-                        base_place, subobj[1])
-                except NameError:
-                    raise Invalid("exp dependency")
-                subobj[1] = place[1]
-                subobj.append(layer)
-                subobj.append(sub_id)
-            elif not skip:
-                subobj[1] = re.sub(r"\n(.*)\n", place_replace, subobj[1])
-            self.frame["action_parameters"]["multiple"]["object"].append({
-                "place_desc": param(place, 1),
-                "object_desc": {
-                    "place_id": param(subobj, 1), "layer": param(subobj, 2),
-                    "id": param(subobj, 3)}})
-
-    @action
-    def hide_obj(self, *argv):
+    @action({"type": "bg_obj"})
+    def hide_obj(self):
         '''Hide an object. Arguments are place name and object name.'''
         self.frame["action_name"] = "HideObject"
-        self.hide_rev_obj_helper(*argv)
+        self.frame["action_parameters"] = {"multiple": {"object": []}}
 
-    @action
-    def rev_obj(self, *argv):
+    @action({"type": "bg_obj"})
+    def rev_obj(self):
         '''Reveal an object. Arguments are place name and object name.'''
         self.frame["action_name"] = "RevealObject"
-        self.hide_rev_obj_helper(*argv)
+        self.frame["action_parameters"] = {"multiple": {"object": []}}
 
     @no_manual
     def hide_rev_sce_helper(self, *argv):
         '''Helper function for revealing and hiding scenes. Handles the
         action parameters.'''
-        scene = expression_pack(argv, global_schema=(2,))["global"][0]
-        if scene[0] == "val":
-            scene.insert(1, "scenes")
+        scene, = expression_pack(argv, (2,))
+        scene = self.scene_exp(scene, ("global", "scene", "scene_id"))
         self.frame["action_parameters"] = {
             "global": {
                 "scene": {
@@ -1032,133 +862,99 @@ class Library(object):
                 }
             }
         }
-        self.anc_dict["scenes"]["destination"].add((
-            "frames", self.frame["id"], "action_parameters", "global",
-            "scene", "scene_id"))
 
-    @action
+    @action()
     def hide_sce(self, *argv):
         '''Hide scene. Argument is scene anchor.'''
         self.frame["action_name"] = "HideScene"
         self.hide_rev_sce_helper(*argv)
 
-    @action
+    @action()
     def rev_sce(self, *argv):
         '''Reveal scene. Argument is scene anchor.'''
         self.frame["action_name"] = "RevealScene"
         self.hide_rev_sce_helper(*argv)
 
     @no_manual
-    def hide_rev_intro_helper(self, *argv):
-        '''Helper function for revealing and hiding introduction
-        conversations. Handles action parameters.'''
-        parsed_exp = expression_pack(argv, global_schema=(6,))["global"][0]
-        if parsed_exp[0] == "val":
-            parsed_exp.insert(1, "scenes")
-            parsed_exp += (parsed_exp[1:3] + ["dialogues", "1"])
+    def intro_helper(self, *argv):
+        '''Helper function for setting introduction conversations. Handles
+        action parameters.'''
+        # It's perfectly safe to use expression_pack here, since this is
+        # only ever called for global arguments, not multiple.
+        dialogue, = expression_pack(argv, (4,))
+        dialogue = self.dialogue_exp(
+            dialogue, ("global", "scene", "scene_id"),
+            ("global", "dialogue", "scene_id"))
         self.frame["action_parameters"] = {"global": {
-            "scene": {"scene_type": param(parsed_exp, 1),
-                      "scene_id": param(parsed_exp, 2)},
-            "dialogue": {"scene_type": param(parsed_exp, 3),
-                         "scene_id": param(parsed_exp, 4),
-                         "section_type": param(parsed_exp, 5),
-                         "section_id": param(parsed_exp, 6)}
+            "scene": {"scene_type": param(dialogue, 1),
+                      "scene_id": param(dialogue, 2)},
+            "dialogue": {"scene_type": param(dialogue, 1),
+                         "scene_id": param(dialogue, 2),
+                         "section_type": param(dialogue, 3),
+                         "section_id": param(dialogue, 4)}
             }}
-        self.anc_dict["scenes"]["destination"].add((
-            "frames", self.frame["id"], "action_parameters", "global",
-            "scene", "scene_id"))
-        self.anc_dict["scenes"]["destination"].add((
-            "frames", self.frame["id"], "action_parameters", "global",
-            "dialogue", "scene_id"))
 
-    @action
+    @action()
     def hide_intro(self, *argv):
         '''Hide intro conversation. Takes scene anchor as argument.'''
         self.frame["action_name"] = "HideDialogueIntro"
-        self.hide_rev_intro_helper(*argv)
+        self.intro_helper(*argv)
 
-    @action
+    @action()
     def rev_intro(self, *argv):
         '''Reveal intro conversation. Takes scene anchor as argument.'''
         self.frame["action_name"] = "RevealDialogueIntro"
-        self.hide_rev_intro_helper(*argv)
+        self.intro_helper(*argv)
 
     @no_manual
-    def hide_rev_talk_helper(self, *argv):
+    def talk_helper(self, *argv):
         '''Helper function for hiding reveal and talk converstions. Handles
         the action parameters.'''
-        talk = expression_pack(argv, global_schema=(12,))["global"][0]
-        if talk[0] == "val":
-            talk.insert(1, "scenes")
-            talk += (talk[1:3] + ["dialogues", "1"])
-            talk += (talk[-4:] + ["talk_topics", talk[2]])
+        talk, = expression_pack(argv, (6,))
+        talk = self.talk_exp(talk,
+                             ("global", "scene", "scene_id"),
+                             ("global", "dialogue", "scene_id"),
+                             ("global", "talk_topic", "scene_id"),
+                             ("global", "talk_topic", "conv_id"))
         self.frame["action_parameters"] = {"global": {
             "scene": {
                 "scene_type": param(talk, 1), "scene_id": param(talk, 2)},
             "dialogue": {
-                "scene_type": param(talk, 3), "scene_id": param(talk, 4),
-                "section_type": param(talk, 5), "section_id": param(talk, 6)},
+                "scene_type": param(talk, 1), "scene_id": param(talk, 2),
+                "section_type": param(talk, 3), "section_id": param(talk, 4)},
             "talk_topic": {
-                "scene_type": param(talk, 7), "scene_id": param(talk, 8),
-                "section_type": param(talk, 9), "section_id": param(talk, 10),
-                "conv_type": param(talk, 11), "conv_id": param(talk, 12)}}}
-        self.anc_dict["talk_sce"]["destination"].add((
-            "frames", self.frame["id"], "action_parameters", "global",
-            "scene", "scene_id"))
-        self.anc_dict["talk_sce"]["destination"].add((
-            "frames", self.frame["id"], "action_parameters", "global",
-            "dialogue", "scene_id"))
-        self.anc_dict["talk_sce"]["destination"].add((
-            "frames", self.frame["id"], "action_parameters", "global",
-            "talk_topic", "scene_id"))
-        self.anc_dict["talk"]["destination"].add((
-            "frames", self.frame["id"], "action_parameters", "global",
-            "talk_topic", "conv_id"))
+                "scene_type": param(talk, 1), "scene_id": param(talk, 2),
+                "section_type": param(talk, 3), "section_id": param(talk, 4),
+                "conv_type": param(talk, 5), "conv_id": param(talk, 2)}}}
 
-    @action
+    @action()
     def hide_talk(self, *argv):
         '''Hide a talk conversation. Takes convo anchor as argument.'''
         self.frame["action_name"] = "HideTalkTopic"
-        self.hide_rev_talk_helper(*argv)
+        self.talk_helper(*argv)
 
-    @action
+    @action()
     def rev_talk(self, *argv):
         '''Reveal a talk conversation. Takes convo anchor as argument.'''
         self.frame["action_name"] = "RevealTalkTopic"
-        self.hide_rev_talk_helper(*argv)
+        self.talk_helper(*argv)
 
     @no_manual
     def hide_rev_psy_button_helper(self, *argv):
         '''Helper functions for hiding and revealing the psyche-lock
         button. Handles action parameters.'''
-        parsed_exp = expression_pack(argv, global_schema=(6,))["global"][0]
-        if parsed_exp[0] == "val":
-            parsed_exp.insert(1, "scenes")
-            parsed_exp += (parsed_exp[1:3] + ["dialogues", "1"])
-        self.frame["action_parameters"] = {
-            "global": {"scene": {"scene_type": param(parsed_exp, 1),
-                                 "scene_id": param(parsed_exp, 2)},
-                       "dialogue": {"scene_type": param(parsed_exp, 3),
-                                    "scene_id": param(parsed_exp, 4),
-                                    "section_type": param(parsed_exp, 5),
-                                    "section_id": param(parsed_exp, 6)}}}
-        self.anc_dict["scenes"]["destination"].add((
-            "frames", self.frame["id"], "action_parameters", "global",
-            "scene", "scene_id"))
-        self.anc_dict["scenes"]["destination"].add((
-            "frames", self.frame["id"], "action_parameters", "global",
-            "dialogue", "scene_id"))
+        self.intro_helper(*argv)
         self.check_locks.add((
             "frames", self.frame["id"], "action_parameters", "global",
             "scene", "scene_id"))
 
-    @action
+    @action()
     def hide_psy_button(self, *argv):
         '''Hide psyche-locks button. Takes scene anchor as argument.'''
         self.frame["action_name"] = "HideDialogueLocks"
         self.hide_rev_psy_button_helper(*argv)
 
-    @action
+    @action()
     def rev_psy_button(self, *argv):
         '''Hide psyche-locks button. Takes scene anchor as argument.'''
         self.frame["action_name"] = "RevealDialogueLocks"
@@ -1174,27 +970,25 @@ class Library(object):
             "section_type": "val=dialogues", "section_id": "val=1"}}}
 
     @scene_only
-    @action
+    @action()
     def hide_psy(self):
         '''Hide psyche-locks. Can only be used in investigation.'''
         self.frame["action_name"] = "LocksHide"
         self.hide_rev_psy_helper()
 
     @scene_only
-    @action
+    @action()
     def rev_psy(self):
         '''Reveal psyche-locks. Can only be used in investigation.'''
         self.frame["action_name"] = "LocksShow"
         self.hide_rev_psy_helper()
 
     @scene_only
-    @action
-    def break_psy(self, *argv):
+    @action({"type": "lock"})
+    def break_psy(self, break_now=False):
         '''Break a psyche-lock or psyche-locks. Argument is lock numbers.
         0 for automatic mode. Can only be used in investigation.'''
-        argv = argv or ["0"]
         self.frame["action_name"] = "LocksBreak"
-        parsed_exp = expression_pack(argv, mult_schema=(5,))["multiple"]
         self.frame["action_parameters"] = {
             "context": {"parent_dialogue": {
                 "scene_type": "val=scenes",
@@ -1202,44 +996,26 @@ class Library(object):
                 "section_type": "val=dialogues", "section_id": "val=1"}},
             "multiple": {"lock": []}
         }
-        for descript in parsed_exp:
-            descript = descript[0]
-            if descript[0] == "val":
-                descript = [
-                    descript[0], "scenes", str(self.scene["id"]),
-                    "dialogues", "1", descript[1]]
-            try:
-                int(descript[5])
-            except ValueError:
-                descript[5] = "0"
-            self.frame["action_parameters"]["multiple"]["lock"].append({
-                "lock_desc": {
-                    "scene_type": param(descript, 1),
-                    "scene_id": param(descript, 2),
-                    "section_type": param(descript, 3),
-                    "section_id": param(descript, 4),
-                    "lock_id": param(descript, 5)}})
+        if break_now:
+            self.lock_type("0")
 
     @no_manual
     def set_red_health_helper(self, *argv):
         '''Helper for setting and reducing health. Handles the action
         parameters.'''
-        descript = expression_pack(argv, global_schema=(1,))["global"][0]
-        if descript[0] == "val":
-            validate_int(descript[1], "Health")
-        self.frame["action_parameters"] = {
-            "context": {"not_merged": "val=true"},
-            "global": {"points": param(descript, 1)}}
+        self.flash_inc_health_helper(*argv)
+        self.frame["action_parameters"]["context"] = {
+            "not_merged": "val=true"}
 
     @merge_lock
-    @action
+    @action()
     def set_health(self, *argv):
         '''Set health. Argument is the number.'''
         self.frame["action_name"] = "SetHealth"
         self.set_red_health_helper(*argv)
 
     @merge_lock
-    @action
+    @action()
     def red_health(self, *argv):
         '''Reduce health. Argument is the number.'''
         self.frame["action_name"] = "ReduceHealth"
@@ -1249,50 +1025,46 @@ class Library(object):
     def flash_inc_health_helper(self, *argv):
         '''Helper for flashing and increasing health. Handles action
         parameters.'''
-        descript = expression_pack(argv, global_schema=(1,))["global"][0]
+        descript, = expression_pack(argv, (1,))
         if descript[0] == "val":
             validate_int(descript[1], "Health")
         self.frame["action_parameters"] = {
             "global": {"points": param(descript, 1)}}
 
-    @action
+    @action()
     def flash_health(self, *argv):
         '''Flash health. Argument is the number.'''
         self.frame["action_name"] = "FlashHealth"
         self.flash_inc_health_helper(*argv)
 
-    @action
+    @action()
     def inc_health(self, *argv):
         '''Increase health. Argument is the number.'''
         self.frame["action_name"] = "IncreaseHealth"
         self.flash_inc_health_helper(*argv)
 
     @no_manual
-    def input_helper(self, global_schema, mult_schema, *argv):
-        '''Helper for input player input functions. Handles parameter
+    def input_helper(self, schema, *argv):
+        '''Helper for player input functions. Handles parameter
         actions.'''
+        if self.location.startswith("sce"):
+            parent_dialogue = {
+                "scene_type": "val=scenes",
+                "scene_id": "val="+str(self.scene["id"]),
+                "section_type": "val=dialogues", "section_id": "val=1"
+            }
+        else:
+            parent_dialogue = "val=0"
         if self.location == "sceLocks":
             # If we're in psyche locks, add a Back Button term.
-            global_schema = (1,) + global_schema
-            exp_parsed = expression_pack(argv, global_schema, mult_schema)
-            parent_dialogue = {"scene_type": "val=scenes", "scene_id":
-                               "val="+str(self.scene["id"]), "section_type":
-                               "val=dialogues", "section_id": "val=1"}
+            schema = (1,) + schema
+            exp_parsed = expression_pack(argv, schema)
             in_locks = "val=true"
-            lock_tuple = exp_parsed["global"].pop(0)
+            lock_tuple = exp_parsed.pop(0)
             if lock_tuple[0] == "val":
-                lock_tuple[1] = "true" if lock_tuple else "false"
+                lock_tuple[1] = "true" if lock_tuple[1] else "false"
         else:
-            if self.location.startswith("sce"):
-                parent_dialogue = {
-                    "scene_type": "val=scenes",
-                    "scene_id": "val="+str(self.scene["id"]),
-                    "section_type": "val=dialogues", "section_id": "val=1"
-                }
-            else:
-                parent_dialogue = "val=0"
-            exp_parsed = expression_pack(
-                argv, global_schema=global_schema, mult_schema=mult_schema)
+            exp_parsed = expression_pack(argv, schema)
             in_locks = "val=0"
             lock_tuple = ["val", "false"]
         self.frame["action_parameters"] = {
@@ -1303,36 +1075,22 @@ class Library(object):
         return exp_parsed
 
     @merge_lock
-    @action
+    @action({"type": "answer"})
     def choice(self, *argv):
         '''Write a multiple choice prompt. Arguments are respectively text to
         display and anchor.'''
         self.frame["action_name"] = "MultipleChoices"
-        exp_parsed = self.input_helper(tuple(), (1, 1), *argv)
+        self.input_helper(tuple(), *argv)
         self.frame["action_parameters"]["multiple"]["answer"] = []
-        insert = self.frame["action_parameters"]["multiple"]["answer"]
-        for text, frame in exp_parsed["multiple"]:
-            self.anc_dict["frames"]["destination"].add((
-                "frames", self.frame["id"], "action_parameters",
-                "multiple", "answer", len(insert), "answer_dest"))
-            insert.append({
-                "answer_text": param(text, 1), "answer_dest": param(frame, 1)})
 
     @merge_lock
-    @action
+    @action({"type": "ev_frame", "bad_ev_msg": "Item to present"})
     def ask_ev(self, *argv):
         '''Request evidence from player. Arguments are type lock, failure
         destination, then alternating object to present and failure
         location...'''
-        def check_ev(item):
-            '''Utility function to check if the item is a profile or
-            evidence.'''
-            return self.from_object_dict(
-                item, {"profiles", "evidence"}, "Item to present")
-
         self.frame["action_name"] = "AskForEvidence"
-        exp_parsed = self.input_helper((1, 1), (2, 1), *argv)
-        lock, dest = exp_parsed["global"]
+        lock, dest = self.input_helper((1, 1), *argv)
         if lock[0] == "val":
             lock[1] = key_or_value(
                 lock[1], {"ev": "evidence", "pro": "profiles", "all": "all"},
@@ -1340,36 +1098,238 @@ class Library(object):
             )
         snip = {"type_lock": param(lock, 1), "failure_dest": param(dest, 1)}
         self.frame["action_parameters"]["global"].update(snip)
-        self.anc_dict["frames"]["destination"].add((
-            "frames", self.frame["id"], "action_parameters", "global",
-            "failure_dest"))
+        self.frame_exp(("global", "failure_dest"))
         self.frame["action_parameters"]["multiple"]["element"] = []
-        insert = self.frame["action_parameters"]["multiple"]["element"]
-        for ele, frame in exp_parsed["multiple"]:
-            if ele[0] == "val":
-                evi = check_ev(ele[1])
-                ele = [ele[0], evi.attribute, evi.data["id"]]
-            else:
-                ele[1] = re.sub(r"\n(.*)\n", (
-                    lambda m: check_ev(m.group(1)).atribute), ele[1])
-                ele[2] = re.sub(r"\n(.*)\n", (
-                    lambda m: check_ev(m.group(1)).data["id"]), ele[2])
-            self.anc_dict["frames"]["destination"].add((
-                "frames", self.frame["id"], "action_parameters", "multiple",
-                "element", len(insert), "element_dest"
-            ))
-            insert.append({
-                "element_desc": {"type": param(ele, 1), "id": param(ele, 2)},
-                "element_dest": param(frame, 1)
-            })
 
     @merge_lock
-    @action
+    @action({"type": "exam_frame"})
     def point(self, *argv):
         '''Call on the player to point to an area. Arguments are background,
         target frame ID, a region term, and a target frame anchor. A back
         button is prepended to the argument list if in a scene.'''
+        self.frame["action_name"] = "PointArea"
+        place, frame = self.input_helper((1, 1), *argv)
+        # AAO doesn't support expressions or default places for this
+        # action yet. Remove kill_exp and built_dict kwargs, respectively,
+        # when those get fixed.
+        place = self.place_exp(place, built_dict={}, kill_exp=True)
+        snip = {"background": param(place, 1), "failure_dest": param(frame, 1)}
+        self.frame["action_parameters"]["global"].update(snip)
+        self.frame_exp(("global", "failure_dest"))
+        self.frame["action_parameters"]["multiple"]["area"] = []
 
+    @merge_lock
+    @action({"type": "input"})
+    def player_in(self):
+        '''Call on the player for input. Arguments are multiples of a type
+        keyword, whether to use password mode, and the variable name.'''
+        self.frame["action_name"] = "InputVars"
+        self.frame["action_parameters"] = {
+            "context": {"not_merged": "val=true"}, "multiple": {"variable": []}
+        }
+
+    @action({"type": "var"})
+    def var_def(self):
+        '''Define a multiple of variables, with a series of names and
+        values.'''
+        self.frame["action_name"] = "DefineVars"
+        self.frame["action_parameters"] = {"multiple": {"variable": []}}
+
+    @merge_lock
+    @action({"type": "val_dest"})
+    def exp_test(self, *argv):
+        '''Test an expression. The global sequence is whether a variable or
+        expression is tested, then the variable to test, expression to test,
+        and the failure anchor. If the first variable isn't an expression,
+        skip the second or third argument - whichever doesn't matter. The
+        multiples are a sequence of test values and anchors upon success.'''
+        self.frame["action_name"] = "TestExprValue"
+        global_schema = (1, 1, 1, 1) if argv[0].startswith("{") else (1, 1, 1)
+        glob_list = expression_pack(argv, global_schema)
+        if glob_list[0][0] == "val":
+            glob_list[0][1] = key_or_value(glob_list[0][1], {
+                "exp": "expression", "var": "var_name"}, "variable", True)
+            index = 2 if glob_list[0][1] == "var_name" else 1
+            glob_list.insert(index, ["val", ""])
+        self.frame["action_parameters"] = {
+            "context": {"not_merged": "val=true"}, "global": {
+                "expr_type": param(glob_list[0], 1),
+                "var_name": param(glob_list[1], 1),
+                "expression": param(glob_list[2], 1),
+                "failure_dest": param(glob_list[3], 1)
+                },
+            "multiple": {"values": []}}
+        self.frame_exp(("global", "failure_dest"))
+
+    @merge_lock
+    @action({"type": "condit"})
+    def condit(self, *argv):
+        '''Evaluate conditions to redirect the player. The first argument is
+        the failure frame anchor. Afterwards is a series of conditions and
+        target frame anchors.'''
+        self.frame["action_name"] = "EvaluateConditions"
+        frame, = expression_pack(argv, (1,))
+        self.frame["action_parameters"] = {
+            "context": {"not_merged": "val=true"}, "global": {
+                "failure_dest": param(frame, 1)},
+            "multiple": {"condition": []}}
+        self.frame_exp(("global", "failure_dest"))
+
+    @no_manual
+    def evidence_exp(self, evidence):
+        '''Convert a tuple representing evidence from user-input to editor
+        form.'''
+        if evidence[0] == "val":
+            item = self.check_ev(evidence[1])
+            evidence = ("val", item.attribute, str(item.data["id"]))
+        else:
+            evidence[1] = re.sub(r"\n(.*)\n", (
+                lambda m: self.check_ev(m.group(1)).attribute), evidence[1])
+            evidence[2] = re.sub(r"\n(.*)\n", (
+                lambda m: self.check_ev(m.group(1)).data["id"]), evidence[2])
+        return evidence
+
+    @no_manual
+    def frame_exp(self, anc_terms):
+        '''Add the specified frame location to the list of frames to
+        replace.'''
+        self.anc_dict["frames"]["destination"].add(
+            ("frames", self.frame["id"], "action_parameters") + anc_terms)
+
+    @no_manual
+    def ev_pos_exp(self, pos, prev_ev):
+        '''Convert a tuple representing evidence position from user-input
+        to editor form.'''
+        pos_dict = {"a": "auto", "tr": "topright", "tl": "topleft",
+                    "br": "bottomright", "bl": "bottomleft"}
+        if pos[0] == "val":
+            pos[1] = key_or_value(
+                pos[1], pos_dict, "evidence position", True)
+        for ele in prev_ev:
+            if ele["position"] == param(pos, 1):
+                raise Invalid("mult pos", pos[1])
+        return pos
+
+    @no_manual
+    def place_exp(self, place, built_dict=False, kill_exp=False):
+        '''Convert a tuple represneting place from user-input to editor
+        form.'''
+        def place_replace(match):
+            '''Replace place keywords with the place ID as needed.'''
+            match = match.group(1)
+            try:
+                base_place = self.from_object_dict(
+                    match, {"places"}, "dummy_string")
+                return str(base_place.data["id"])
+            except Invalid:
+                return str(key_or_value(match, built_dict, "place"))
+
+        # Redefine built_dict, taking care not to override {}.
+        built_dict = {
+            "black": -1, "pw bench": -2, "pw judge": -6, "pw counsel": -3,
+            "pw court loud": -8, "pw court silent": -9, "pw lobby": -10,
+            "pw det behind": -18, "pw det ahead": -19, "aj bench": -12,
+            "aj judge": -14, "aj counsel": -13, "aj court loud": -15,
+            "aj court silent": -16, "aj lobby": -17, "aj det behind": -20,
+            "aj det ahead": -21, "power def": -4, "power pros": -5,
+            "gavel 1": -7, "gavel 3": -11
+        } if built_dict == False else built_dict
+
+        if place[0] == "val":
+            # If the place isn't an expression, seek from the defined places,
+            # then the AAO built-ins with objects.
+            try:
+                base_place = self.from_object_dict(
+                    place[1], {"places"}, "Place with object")
+                place[1] = base_place.data["id"]
+            # Check if it's an acceptable built-in place.
+            except Invalid:
+                place = ["val", key_or_value(
+                    place[1], built_dict, "place")]
+        elif kill_exp:
+            raise Invalid("no exp", "place")
+        else:
+            # Parse Catalysis expressions immediately.
+            place[1] = re.sub(r"\n(.*)\n", place_replace, place[1])
+        return place
+
+    @no_manual
+    def bg_fg_obj_exp(self, bg_fg_obj, place, built_dict):
+        '''Convert a tuple representing a background or foreground object from
+        user-input to editor form.'''
+        place = self.place_exp(place, built_dict)
+        # If the object is an expression, no need to fix.
+        if bg_fg_obj[0] != "val":
+            return place, bg_fg_obj
+        # It isn't possible to fix an expression's object.
+        if place[0] != "val":
+            raise Invalid("exp dependency")
+
+        if place[1] > 0:
+            active_place = self.trial["places"][place[1]]
+            layer, sub_id = find_subobject(
+                {"foreground_objects", "background_objects"}, active_place,
+                bg_fg_obj[1])
+            bg_fg_obj = ("val", layer, sub_id)
+        else:
+            bg_fg_obj = ("val", "foreground_objects", 1)
+        return place, bg_fg_obj
+
+    @no_manual
+    def scene_exp(self, scene, anc_terms, talk=False):
+        '''Convert a tuple representing a scene from user-input to
+        editor form.'''
+        anc_cat = "talk_sce" if talk else "scenes"
+        if scene[0] == "val":
+            scene.insert(1, "scenes")
+        self.anc_dict[anc_cat]["destination"].add((
+            "frames", self.frame["id"], "action_parameters") + anc_terms)
+        return scene
+
+    @no_manual
+    def dialogue_exp(self, dialogue, anc_terms_sce, anc_terms_dia, talk=False):
+        '''Convert a tuple representing dialogue from user-input to editor
+        form.'''
+        dialogue = self.scene_exp(dialogue, anc_terms_sce, talk)
+        anc_cat = "talk_sce" if talk else "scenes"
+        if dialogue[0] == "val":
+            dialogue += ["dialogues", "1"]
+        self.anc_dict[anc_cat]["destination"].add((
+            "frames", self.frame["id"], "action_parameters") + anc_terms_dia)
+        return dialogue
+
+    @no_manual
+    def talk_exp(self, talk, anc_sce, anc_dia, anc_talk_1, anc_talk_2):
+        '''Convert a tuple representng a talk conversation from user-input
+        to editor form.'''
+        talk = self.dialogue_exp(talk, anc_sce, anc_dia, talk)
+        if talk[0] == "val":
+            # The scene anchor name is also the talk anchor name in val mode.
+            talk += ["talk_topics", talk[2]]
+        self.anc_dict["talk_sce"]["destination"].add((
+            "frames", self.frame["id"], "action_parameters") + anc_talk_1)
+        self.anc_dict["talk"]["destination"].add((
+            "frames", self.frame["id"], "action_parameters") + anc_talk_2)
+        return talk
+
+    @no_manual
+    def lock_exp(self, descript):
+        '''Convert a tuple representing a psyche-lock from user-input to
+        editor form.'''
+        if descript[0] == "val":
+            descript = [
+                descript[0], "scenes", str(self.scene["id"]),
+                "dialogues", "1", descript[1]]
+        try:
+            int(descript[5])
+        except ValueError:
+            descript[5] = "0"
+        return descript
+
+    @no_manual
+    def exam_exp(self, parse_instr, shape, pieces):
+        '''Convert a tuple representing a region to select from user-input to
+        editor form.'''
         def poly(pieces):
             '''Validate for a polygonal shape.'''
             if len(pieces) % 2:
@@ -1390,143 +1350,158 @@ class Library(object):
                     int(pieces[3]) > int(pieces[1]))):
                 raise Invalid("rect to quad 4")
 
-        self.frame["action_name"] = "PointArea"
-        exp_parsed = self.input_helper((1, 1), (1, 1), *argv)
-        place, frame = exp_parsed["global"]
-        if place[0] == "val":
+        if parse_instr == "val":
             try:
-                place[1] = self.from_object_dict(
-                    place[1], {"places"}, "Place to point at").data["id"]
-            except Invalid:
-                built_dict = {
-                    "black": -1, "pw bench": -2, "pw judge": -6,
-                    "pw counsel": -3, "pw court loud": -8,
-                    "pw court silent": -9, "pw lobby": -10,
-                    "pw det behind": -18, "pw det ahead": -19,
-                    "aj bench": -12, "aj judge": -14, "aj counsel": -13,
-                    "aj court loud": -15, "aj court silent": -16,
-                    "aj lobby": -17, "aj det behind": -20,
-                    "aj det ahead": -21, "power def": -4, "power pros": -5,
-                    "gavel 1": -7, "gavel 3": -11
-                }
-                place[1] = key_or_value(place[1], built_dict, "place")
-        snip = {"background": param(place, 1), "failure_dest": param(frame, 1)}
-        self.frame["action_parameters"]["global"].update(snip)
-        self.anc_dict["frames"]["destination"].add((
-            "frames", self.frame["id"], "action_parameters", "global",
-            "failure_dest"))
-        self.frame["action_parameters"]["multiple"]["area"] = []
+                {"poly": poly, "circle": circle, "rect": rect}[
+                    shape](pieces)
+            except KeyError:
+                raise Invalid("bad shape", shape)
+            for coord in pieces:
+                int_at_least(coord, 0, "All arguments after polygon shape")
+        return [parse_instr, shape + ":" + ",".join(pieces)]
+
+    @no_manual
+    def ev_pos_type(self, *argv):
+        '''Function to handle evidence and position tuples as multiple
+        parameters.'''
+        evidence, pos = expression_pack(argv, (2, 1))
+        insert = self.frame["action_parameters"]["multiple"]["element"]
+        evidence = self.evidence_exp(evidence)
+        pos = self.ev_pos_exp(pos, insert)
+        insert.append({
+            "element_desc": {
+                "type": param(evidence, 1), "id": param(evidence, 2)},
+            "position": param(pos, 1)
+        })
+
+    @no_manual
+    def ev_type(self, *argv):
+        '''Function to handle evidence as a multiple parameter.'''
+        evidence, = expression_pack(argv, (2,))
+        insert = self.frame["action_parameters"]["multiple"]["element"]
+        evidence = self.evidence_exp(evidence)
+        insert.append({"element_desc": {
+            "type": param(evidence, 1), "id": param(evidence, 2)}})
+
+    @no_manual
+    def frame_type(self, *argv):
+        '''Function to handle frames as a multiple parameter.'''
+        frame, = expression_pack(argv, (1,))
+        insert = self.frame["action_parameters"]["multiple"]["frame"]
+        self.frame_exp(("multiple", "frame", len(insert), "target"))
+        insert.append({"target": param(frame, 1)})
+
+    @no_manual
+    def bg_obj_type(self, *argv):
+        '''Function to handle place and place object tuples as multiple
+        parameters.'''
+        place, bg_fg_obj = expression_pack(argv, (1, 2))
+        built_dict = {
+            "pw bench": -2, "pw judge": -6, "pw det behind": -18,
+            "aj bench": -12, "aj judge": -14, "aj det behind": -20}
+        place, bg_fg_obj = self.bg_fg_obj_exp(bg_fg_obj, place, built_dict)
+        self.frame["action_parameters"]["multiple"]["object"].append({
+            "place_desc": param(place, 1),
+            "object_desc": {
+                "place_id": param(place, 1), "layer": param(bg_fg_obj, 1),
+                "id": param(bg_fg_obj, 2)}})
+
+    @no_manual
+    def lock_type(self, *argv):
+        '''Function to handle psyche-locks as a multiple parameter.'''
+        descript, = expression_pack(argv, (5,))
+        descript = self.lock_exp(descript)
+        self.frame["action_parameters"]["multiple"]["lock"].append({
+            "lock_desc": {
+                "scene_type": param(descript, 1),
+                "scene_id": param(descript, 2),
+                "section_type": param(descript, 3),
+                "section_id": param(descript, 4),
+                "lock_id": param(descript, 5)}})
+
+    @no_manual
+    def answer_type(self, *argv):
+        '''Function to handle multiple-choice answers as a multiple
+        parameter.'''
+        text, frame = expression_pack(argv, (1, 1))
+        insert = self.frame["action_parameters"]["multiple"]["answer"]
+        self.frame_exp(("multiple", "answer", len(insert), "answer_dest"))
+        insert.append({
+            "answer_text": param(text, 1), "answer_dest": param(frame, 1)})
+
+    @no_manual
+    def ev_frame_type(self, *argv):
+        '''Function to handle evidence and frame pairs as a multiple
+        parameter.'''
+        ele, frame = expression_pack(argv, (2, 1))
+        insert = self.frame["action_parameters"]["multiple"]["element"]
+        ele = self.evidence_exp(ele)
+        self.frame_exp(("multiple", "element", len(insert), "element_dest"))
+        insert.append({
+            "element_desc": {"type": param(ele, 1), "id": param(ele, 2)},
+            "element_dest": param(frame, 1)
+        })
+
+    @no_manual
+    def exam_frame_type(self, region, shape, *argv):
+        '''Function to handle examination and frame pairs as a multiple
+        parameter.'''
+        first_group = [region, shape] + list(argv[:-1])
+        fixed_args = [','.join(first_group), argv[-1]]
+        exam, frame = expression_pack(fixed_args, (1, 1))
         insert = self.frame["action_parameters"]["multiple"]["area"]
-        # Package argv into a set of tuples...
-        for exam, frame in exp_parsed["multiple"]:
-            if exam[0] == "val":
-                pieces = exam[1].split(",")
-                shape = pieces.pop(0)
-                try:
-                    {"poly": poly, "circle": circle, "rect": rect}[
-                        shape](pieces)
-                except KeyError:
-                    raise Invalid("bad shape", shape)
-                for coord in pieces[1:]:
-                    int_at_least(coord, 0, "All arguments after polygon shape")
-            self.anc_dict["frames"]["destination"].add((
-                "frames", self.frame["id"], "action_parameters", "multiple",
-                "area", len(insert), "area_dest"))
-            insert.append({
-                "area_def": param(exam, 1), "area_dest": param(frame, 1)})
+        items = exam[1].split(",")
+        exam = self.exam_exp(exam[0], items[0], items[1:])
+        self.frame_exp(("multiple", "area", len(insert), "area_dest"))
+        insert.append({
+            "area_def": param(exam, 1), "area_dest": param(frame, 1)})
 
-    @merge_lock
-    @action
-    def player_in(self, *argv):
-        '''Call on the player for input. Arguments are multiples of a type
-        keyword, whether to use password mode, and the variable name.'''
-        self.frame["action_name"] = "InputVars"
-        exp_parsed = expression_pack(argv, mult_schema=(1, 1, 1))["multiple"]
-        self.frame["action_parameters"] = {
-            "context": {"not_merged": "val=true"}, "multiple": {"variable": []}
-        }
+    @no_manual
+    def input_type(self, *argv):
+        '''Function to handle player input as a multiple parameter.'''
         type_dict = {"s": "string", "w": "word", "f": "float"}
-        for name, var_type, password in exp_parsed:
-            if var_type[0] == "val":
-                var_type[1] = key_or_value(
-                    var_type[1], type_dict, "type", True)
-            if password[0] == "val":
-                password[1] = "true" if password[1] else "false"
-            self.frame["action_parameters"]["multiple"]["variable"].append(
-                {"var_name": param(name, 1), "var_type": param(var_type, 1),
-                 "var_password": param(password, 1)})
+        name, var_type, password = expression_pack(argv, (1, 1, 1))
+        if var_type[0] == "val":
+            var_type[1] = key_or_value(
+                var_type[1], type_dict, "type", True)
+        if password[0] == "val":
+            password[1] = "true" if password[1] else "false"
+        self.frame["action_parameters"]["multiple"]["variable"].append(
+            {"var_name": param(name, 1), "var_type": param(var_type, 1),
+             "var_password": param(password, 1)})
 
-    @action
-    def var_def(self, *argv):
-        '''Define a multiple of variables, with a series of names and
-        values.'''
-        self.frame["action_name"] = "DefineVars"
-        exp_parsed = expression_pack(argv, mult_schema=(1, 1))["multiple"]
-        self.frame["action_parameters"] = {"multiple": {"variable": []}}
-        for name, val in exp_parsed:
-            self.frame["action_parameters"]["multiple"]["variable"].append(
-                {"var_name": param(name, 1), "var_value": param(val, 1)})
+    @no_manual
+    def var_type(self, *argv):
+        '''Function to handle variable definitions as a multiple parameter.'''
+        name, val = expression_pack(argv, (1, 1))
+        self.frame["action_parameters"]["multiple"]["variable"].append(
+            {"var_name": param(name, 1), "var_value": param(val, 1)})
 
-    @merge_lock
-    @action
-    def exp_test(self, *argv):
-        '''Test an expression. The global sequence is whether a variable or
-        expression is tested, then the variable to test, expression to test,
-        and the failure anchor. If the first variable isn't an expression,
-        skip the second or third argument - whichever doesn't matter. The
-        multiples are a sequence of test values and anchors upon success.'''
-        self.frame["action_name"] = "TestExprValue"
-        global_schema = (1, 1, 1, 1) if argv[0].startswith("$") else (1, 1, 1)
-        exp_parsed = expression_pack(argv, global_schema, mult_schema=(1, 1))
-        glob_list = exp_parsed["global"]
-        if glob_list[0][0] == "val":
-            glob_list[0][1] = key_or_value(glob_list[0][1], {
-                "exp": "expression", "var": "var_name"}, "variable", True)
-            index = 2 if glob_list[0][1] == "var_name" else 1
-            glob_list.insert(index, ["val", ""])
-        snip = {
-            "expr_type": param(glob_list[0], 1),
-            "var_name": param(glob_list[1], 1),
-            "expression": param(glob_list[2], 1),
-            "failure_dest": param(glob_list[3], 1)
-            }
-        self.frame["action_parameters"] = {
-            "context": {"not_merged": "val=true"}, "global": snip,
-            "multiple": {"values": []}}
-        self.anc_dict["frames"]["destination"].add((
-            "frames", self.frame["id"],
-            "action_parameters", "global", "failure_dest"))
+    @no_manual
+    def val_dest_type(self, *argv):
+        '''Function to handle value, destination pairs for input as a multiple
+        parameter.'''
+        val, dest = expression_pack(argv, (1, 1))
         insert = self.frame["action_parameters"]["multiple"]["values"]
-        for val, dest in exp_parsed["multiple"]:
-            self.anc_dict["frames"]["destination"].add((
-                "frames", self.frame["id"], "action_parameters",
-                "multiple", "values", len(insert), "value_dest"))
-            insert.append({
-                "value": param(val, 1), "value_dest": param(dest, 1)})
+        self.frame_exp(("multiple", "values", len(insert), "value_dest"))
+        insert.append({"value": param(val, 1), "value_dest": param(dest, 1)})
 
-    @merge_lock
-    @action
-    def condit(self, *argv):
-        '''Evaluate conditions to redirect the player. The first argument is
-        the failure frame anchor. Afterwards is a series of conditions and
-        target frame anchors.'''
-        self.frame["action_name"] = "EvaluateConditions"
-        exp_parsed = expression_pack(argv, global_schema=(1,),
-                                     mult_schema=(1, 1))
-        self.frame["action_parameters"] = {
-            "context": {"not_merged": "val=true"}, "global": {
-                "failure_dest": param(exp_parsed["global"][0], 1)},
-            "multiple": {"condition": []}}
-        self.anc_dict["frames"]["destination"].add((
-            "frames", self.frame["id"], "action_parameters", "global",
-            "failure_dest"))
+    @no_manual
+    def condit_type(self, *argv):
+        '''Function to handle expression, destination pairs as a multiple
+        parameter.'''
+        exp, frame = expression_pack(argv, (1, 1))
         insert = self.frame["action_parameters"]["multiple"]["condition"]
-        for exp, frame in exp_parsed["multiple"]:
-            self.anc_dict["frames"]["destination"].add((
-                "frames", self.frame["id"], "action_parameters",
-                "multiple", "condition", len(insert), "cond_dest"))
-            insert.append(
-                {"expression": param(exp, 1), "cond_dest": param(frame, 1)})
+        self.frame_exp(("multiple", "condition", len(insert), "cond_dest"))
+        insert.append(
+            {"expression": param(exp, 1), "cond_dest": param(frame, 1)})
+
+
+    @no_manual
+    def null_type(self, *argv):
+        '''Function to raise an error when multiple arguments are given for
+        an action that has no multiple arguments.'''
+        raise Invalid("global action only")
 
 reserved_names = set()
 method_names = set()

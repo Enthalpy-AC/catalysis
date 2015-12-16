@@ -9,7 +9,10 @@ class Invalid(Exception):
     '''Exception that triggers upon invalid data.'''
     def __init__(self, message, *args):
         super(Invalid, self).__init__(message)
-        self.message = "Error on {} of {}: " + err_dict[message].format(*args)
+        err_code = err_dict[message].format(*args)
+        # Escape all braces in the error code, so format doesn't break.
+        err_code = err_code.replace("{", "{{").replace("}", "}}")
+        self.message = "Error on {} of {}: " + err_code
 
 
 def terminate():
@@ -81,7 +84,7 @@ def find_subobject(seek_attributes, place, target):
     a name attribute of target. Seeks a place's foreground or background
     object.'''
     for attr in seek_attributes:
-        for item in place.data[attr]:
+        for item in place[attr]:
             if item["name"] == target:
                 return (attr, item["id"])
     raise Invalid("missing subobj", target)
@@ -115,6 +118,9 @@ err_dict = {
     "ban duplicate": "{} name {} is used twice.",
     "bad arg num": "Command {} does not have the proper number of arguments.",
     "bad context": "A command {} must be {}one of: {}.",
+    "bad exp number": (
+        "Argument {} received {} pieces of an expression instead of {}."
+    ),
     "bad global arg num": "{} arguments not taken.",
     "bad key": "{} is not a valid {} keyword.",
     "bad shape": "You can only examine with poly, rect, or circle, not {}.",
@@ -131,7 +137,10 @@ err_dict = {
     "circle 3": "circle needs 3 arguments after the shape.",
     "config attr": "Configuration attribute {} is invalid.",
     "config colon": "A configuration line must have ': ' exactly once.",
-    "defaults unsupported": "This action does not support default values.",
+    "defaults unsupported": "This (sub)object has no default values.",
+    "dummy": (
+        "This error message should never be seen. Please notify Enthalpy."
+    ),
     "enforce scene": "Command {} can only be run in an investigation.",
     "excess press": (
         "Tried to start more press conversations than pressable statements."
@@ -142,6 +151,9 @@ err_dict = {
         "place."
     ),
     "expected_new_obj": "Expected initiation of a new object.",
+    "global action only": (
+        "Received multiple arguments for a command that only has globals."
+    ),
     "implicit tuple": (
         "Expected a multiple of {} arguments{}. Remove {} or add {}."
     ),
@@ -167,12 +179,16 @@ err_dict = {
     "mult pos": "Tried to use position {} twice.",
     "mult pres": "Tried to make {} presentable twice.",
     "not word": "{} may only have letters, numbers, and underscores.",
+    "no close brace": "Failed to spot closing brace for argument {}.",
     "no continuation": "Line continuation syntax not supported here.",
     "no default attr": "{} does not support double colon syntax.",
+    "no exp": (
+        "Attempted to use an expression for an action that does not permit" +
+        " them. See the argument for {}."
+    ),
     "no parent obj": "Subobjects need a parent object.",
     "num": "{} must be a number.",
     "obj subobj forbid": "Subobject {} cannot be used in object {}.",
-    "one action": "Action {} is prohibited, since another command is set.",
     "parent obj dne": "Parent object {} not found.",
     "place post char": (
         "Place cannot be defined after characters are defined."
@@ -187,7 +203,7 @@ err_dict = {
         "Arguments 4 and 5 must be greater than arguments 2 and 3, " +
         "respectively."
     ),
-    "schema fail": "Ran out of arguments for {} schema. Failed at term {}.",
+    "schema fail": "Ran out of schema arguments at term {}.",
     "selector": "selector.txt expected this line to be {}.",
     "selector length": "selector.txt must have eight lines.",
     "subobj dne": "Subobject {} not recognized.",
@@ -195,6 +211,10 @@ err_dict = {
     "suffix no prefix": "Attempted to set a suffix before setting a prefix.",
     "terminal merge": "Attempted to merge the last frame into the next frame.",
     "type in set": "{}'s type must be one of: {}.",
+    "unescaped brace": (
+        "An unexpected, unescaped brace was found for " +
+        "argument {}."
+    ),
     "unk line": "Line not recognized. Check for typos.",
     "unk obj": "{} is not a recognized object.",
     "unk pre": "{} is not a recognized prefix.",

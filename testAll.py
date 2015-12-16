@@ -695,6 +695,13 @@ content: Content
 : More content
 }""")
         
+    def test_no_base_dict(self):
+        self.checkError((5, "defaults unsupported"), obj="""Evidence kumquat {
+}
+
+kumquat image {
+base:: upupu""")
+        
 class Object_Sprites(ObjectErrors):
 
     folder = "subobject"
@@ -975,7 +982,7 @@ class Frame_Commands(FrameErrors):
 }""", frame="popup, Foo")
         
     def test_indent(self):
-        self.checkFile("popup", obj="""Popup Foo {
+        self.checkError((1, "unk line"), obj="""Popup Foo {
 }""", frame="    popup, Foo")
         
     def test_popup_no_word(self):
@@ -1023,6 +1030,12 @@ class Frame_Commands(FrameErrors):
     def test_place_error(self):
         self.checkError((1, "bad key", "Foo", "place"), obj="""Popup Foo {
 }""", frame="place, Foo")
+        
+    def test_place_post_char(self):
+        self.checkError((2, "place post char"), obj="""Profile {
+base: Phoenix
+}""", frame="""pw.n
+place, black""")
         
     def test_place_position(self):
         self.checkFile("place position", frame="place, black, left")
@@ -1360,6 +1373,14 @@ ceStatement
 assist
 fail""")
 
+    def test_over_press(self):
+        self.checkError((6, "excess press"), frame="""ceStart
+ceStatement
+
+assist
+press
+press""")
+
     def test_end_inad_press_endce(self):
         self.checkError((5, "inadequate press", "end cross examination", 1), frame="""ceStart
 ceStatement
@@ -1490,14 +1511,12 @@ sceExam, New_Place
 sceMove""")
         
     def test_sce_exam_default_place(self):
-        self.checkFile("exam default", obj="""Place New_Place {
-path:: pw lobby
-}""", frame="""sceIntro
+        self.checkFile("exam default", frame="""sceIntro
 sceMain
 
 sceTalk
 scePres
-sceExam, New_Place
+sceExam, black
 sceMove""")
         
     def test_sce_exam_polygon(self):
@@ -1511,7 +1530,7 @@ scePres
 sceExam, New_Place
 sceExamConvo, poly, 1, 15, 40, 194, 249, 137
 sceMove""")
-        
+
     def test_sce_exam_rect(self):
         self.checkFile("exam rect", obj= """Place New_Place {
 path:: pw lobby
@@ -1728,7 +1747,7 @@ scePres
 sceLocks, 10, 20, 30, kumquat""")
         
     def test_fake_exam_place(self):
-        self.checkError((6, "type in set", "Place to examine", "places"), obj="""Popup kumquat {
+        self.checkError((6, "bad key", "kumquat", "place"), obj="""Popup kumquat {
 }""", frame="""sceIntro
 sceMain
 
@@ -1816,21 +1835,43 @@ class Anchors_Exp_Pack(FrameErrors):
     folder = "action"
     
     def test_bad_pack(self):
-        self.checkError((1, "schema fail", "multiple", 1), frame="dispEv, $1")
+        self.checkError((2, "bad exp number", 1, 1, 2), frame="""dispEv
+{1}""")
+        
+    def test_no_close(self):
+        self.checkError((2, "no close brace", "kumquat"), frame="""dispEv
+{1, kumquat""")
+        
+    def test_unescaped_brace_exp(self):
+        self.checkError((2, "unescaped brace", "{kumquat"), frame="""dispEv
+{1, {kumquat}""")
+        
+    def test_unescaped_brace(self):
+        self.checkError((2, "unescaped brace", "kumquat}"), frame="""dispEv
+kumquat}""")
     
     def test_var_def(self):
-        self.checkError((1, "schema fail", "multiple", 2), frame="varDef, 1")
+        self.checkError((2, "schema fail", 2), frame="""varDef
+1""")
     
     def test_global_excess(self):
         self.checkError((1, "bad global arg num", 2), frame="setOver, my_anc, other_anc, additional_anc")
     
     def test_single_marker(self):
-        self.checkError((1, "$ syntax", "$1"), frame="dispEv, $$1, $2")
+        self.checkError((2, "$ syntax", "$1"), frame="""dispEv
+{$1, 2}, {3}""")
         
     def test_exp_anchor(self):
-        self.checkFile("anchor expression", frame="""setOver, $$my_over$
+        self.checkFile("anchor expression", frame="""setOver, {$my_over$}
 
 anc, my_over""")
+        
+    def test_colon_terminate(self):
+        self.checkFile("colon terminate", frame="""varDef
+foo, bar:
+
+null:
+Start dialogue.""")
 
 class CR_GameFlow_Action(FrameErrors):
     
@@ -1838,46 +1879,60 @@ class CR_GameFlow_Action(FrameErrors):
     
     def test_dispEv_keypos(self):
         self.checkFile("dispEv normal profile", obj="""Profile my_ev{
-}""", frame="dispEv, my_ev, tr")
+}""", frame="""dispEv
+my_ev, tr""")
         
     def test_dispEv_valpos(self):
         self.checkFile("dispEv normal ev", obj="""Evidence my_ev{
-}""", frame="dispEv, my_ev, tr, my_ev, bottomleft")
+}""", frame="""dispEv
+my_ev, tr
+my_ev, bottomleft""")
         
     def test_dispEv_bad_item(self):
-        self.checkError((1, "type in set", "Item to display", "profiles, evidence"), obj="""Place my_ev{
-}""", frame="dispEv, my_ev, tr")
+        self.checkError((2, "type in set", "Item to display", "profiles, evidence"), obj="""Place my_ev{
+}""", frame="""dispEv
+my_ev, tr""")
         
     def test_dispEv_bad_pos(self):
-        self.checkError((1, "bad key", "tru", "evidence position"), obj="""Evidence my_ev{
-}""", frame="dispEv, my_ev, tru")
+        self.checkError((2, "bad key", "tru", "evidence position"), obj="""Evidence my_ev{
+}""", frame="""dispEv
+my_ev, tru""")
         
     def test_dispEv_rep_pos(self):
-        self.checkError((1, "mult pos", "topright"), obj="""Evidence my_ev{
+        self.checkError((3, "mult pos", "topright"), obj="""Evidence my_ev{
 }
 
 Profile my_ev2{
-}""", frame="dispEv, my_ev, tr, my_ev2, topright")
+}""", frame="""dispEv
+my_ev, tr
+my_ev2, topright""")
         
     def test_dispEv_expression_mode(self):
         self.checkFile("dispEv exp", obj="""Evidence my_ev{
-}""", frame="dispEv, $my_arg, my_second_arg, $my_third_arg, my_ev, tr")
+}""", frame="""dispEv
+{my_arg, my_second_arg},{my_third_arg}
+my_ev, tr""")
 
     def test_hideEv_keypos(self):
         self.checkFile("hideEv normal profile", obj="""Profile my_ev{
-}""", frame="hideEv, my_ev")
+}""", frame="""hideEv
+my_ev""")
         
     def test_hideEv_bad_item(self):
-        self.checkError((1, "type in set", "Item to hide", "profiles, evidence"), obj="""Place my_ev{
-}""", frame="hideEv, my_ev")
+        self.checkError((2, "type in set", "Item to hide", "profiles, evidence"), obj="""Place my_ev{
+}""", frame="""hideEv
+my_ev""")
         
     def test_hideEv_expression_mode(self):
         self.checkFile("hideEv exp", obj="""Profile my_ev{
-}""", frame="hideEv, $my_arg, my_second_arg, my_ev")
+}""", frame="""hideEv
+{my_arg, my_second_arg}
+my_ev""")
         
     def test_revEv_keypos(self):
         self.checkFile("revEv normal profile", obj="""Profile my_ev{
-}""", frame="revEv, my_ev")
+}""", frame="""revEv
+my_ev""")
         
     def test_over_normal(self):
         self.checkFile("setOver normal", frame="""setOver, my_anc
@@ -1885,25 +1940,35 @@ Profile my_ev2{
 anc, my_anc""")
         
     def test_over_exp(self):
-        self.checkFile("setOver exp", frame="setOver, $my_anc")
+        self.checkFile("setOver exp", frame="setOver, {my_anc}")
         
     def test_proceed_normal(self):
         self.checkFile("proceed normal", frame="""proceed, my_anc
 
 anc, my_anc""")
-        
+
+    def test_proceed_merged(self):
+        self.checkError((2, "ban on merge", "proceed"), frame="""merge
+proceed, foo""")
+
     def test_hideFrame_normal(self):
-        self.checkFile("hideFrame normal", frame="""hideFrame, my_anc, my_other_anc
+        self.checkFile("hideFrame normal", frame="""hideFrame
+my_anc
+my_other_anc
 
 anc, my_anc
 
 anc, my_other_anc""")
         
     def test_hideFrame_exp(self):
-        self.checkFile("hideFrame exp", frame="hideFrame, $my_anc, $my_other_anc")
+        self.checkFile("hideFrame exp", frame="""hideFrame
+{my_anc}
+{my_other_anc}""")
         
     def test_revealFrame_normal(self):
-        self.checkFile("revealFrame normal", frame="""revealFrame, my_anc, my_other_anc
+        self.checkFile("revealFrame normal", frame="""revealFrame
+my_anc
+my_other_anc
 
 anc, my_anc
 
@@ -1919,7 +1984,7 @@ anc, my_other_anc""")
         self.checkFile("end game another", frame="gameOver, another, full, 2, 10")
         
     def test_end_expression(self):
-        self.checkFile("end game exp", frame="gameOver, $1, $4, $2, $3")
+        self.checkFile("end game exp", frame="gameOver, {1}, {4}, {2}, {3}")
         
     def test_end_missing_next(self):
         self.checkError((1, "arg missing", "Data to transfer"), frame="gameOver, next")
@@ -1928,14 +1993,15 @@ anc, my_other_anc""")
         self.checkError((1, "bad key", "kumquat", "target part"), frame="gameOver, kumquat")
 
     def test_end_bad_key_exp(self):
-        self.checkError((1, "bad key", "kumquat", "target part"), frame="gameOver, kumquat, $2, $3, $4")
+        self.checkError((1, "bad key", "kumquat", "target part"), frame="gameOver, kumquat, {2}, {3}, {4}")
         
     def test_end_missing_key(self):
         self.checkError((1, "arg missing", "Target part"), frame="gameOver, another, 2, _, full")
 
     def test_action_overwrite(self):
-        self.checkError((2, "one action", "dispEv"), frame="""proceed, foo
-dispEv, kumquat""")
+        self.checkError((2, "global action only", "dispEv"), frame="""proceed, foo
+dispEv
+kumquat""")
 
 class CR_GameEnv(FrameErrors):
 
@@ -1947,7 +2013,8 @@ class CR_GameEnv(FrameErrors):
 
 my_place Foreground {
 name: my_obj
-}""", frame="hideObj, my_place, my_obj")
+}""", frame="""hideObj
+my_place, my_obj""")
 
     def test_hideObj_bg(self):
         self.checkFile("hide object bg", obj="""Place my_place {
@@ -1955,37 +2022,44 @@ name: my_obj
 
 my_place Background {
 name: my_obj
-}""", frame="hideObj, my_place, my_obj")
-        
+}""", frame="""hideObj
+my_place, my_obj""")
+
     def test_hideObj_exp(self):
-        self.checkFile("hide object exp", frame="hideObj, $1, $2, 3, 4")
+        self.checkFile("hide object exp", frame="""hideObj
+{1}, {2, 3}""")
         
     def test_revObj_exp(self):
         self.checkFile("reveal object exp", obj="""Place street {
-}""", frame="revObj, $$street$, $$street$, 'foreground', 'object':")
+}""", frame="""revObj
+{$street$}, {'foreground', 'object':}""")
 
     def test_hideObj_mixed_err(self):
-        self.checkError((1, "exp dependency"), obj="""Place my_place {
+        self.checkError((2, "exp dependency"), obj="""Place my_place {
 }
 
 my_place Background {
 name: my_obj
-}""", frame="hideObj, $1, my_obj")
+}""", frame="""hideObj
+{1}, my_obj""")
 
     def test_hideObj_not_place(self):
-        self.checkError((1, "bad key", "my_place", "place"), obj="""Popup my_place {
-}""", frame="hideObj, my_place, my_obj")
+        self.checkError((2, "bad key", "my_place", "place"), obj="""Popup my_place {
+}""", frame="""hideObj
+my_place, my_obj""")
 
     def test_hideObj_default(self):
-        self.checkFile("hide object default", frame="hideObj, aj judge, filler")
+        self.checkFile("hide object default", frame="""hideObj
+aj judge, filler""")
 
     def test_hideObj_fake_sub(self):
-        self.checkError((1, "missing subobj", "kumquat"), obj="""Place my_place {
+        self.checkError((2, "missing subobj", "kumquat"), obj="""Place my_place {
 }
 
 my_place Foreground {
 name: my_obj
-}""", frame="hideObj, my_place, kumquat")
+}""", frame="""hideObj
+my_place, kumquat""")
 
     def test_hideSce_norm(self):
         self.checkFile("hide scene normal", frame="""sceIntro
@@ -2005,7 +2079,7 @@ sceTalk
 scePres
 sceExam
 sceMove
-hideSce, $1, 2""")
+hideSce, {1, 2}""")
         
     def test_revSce_norm(self):
         self.checkFile("reveal scene normal", frame="""sceIntro
@@ -2035,7 +2109,7 @@ sceTalk
 scePres
 sceExam
 sceMove
-hideIntro, $1, 2, 3, 4, 5, 6""")
+hideIntro, {1, 2, 3, 4}""")
         
     def test_revIntro_norm(self):
         self.checkFile("reveal intro normal", frame="""sceIntro
@@ -2058,7 +2132,7 @@ sceExam
 sceMove
 hideTalk, talk_anc""")
         
-    def test_hideTalk_exp(self):
+    def test_revTalk_exp(self):
         self.checkFile("reveal talk exp", frame="""sceIntro
 sceMain, my_sce
 
@@ -2067,8 +2141,8 @@ sceTalkConvo, _, _, talk_anc
 scePres
 sceExam
 sceMove
-revTalk, $1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12""")
-        
+revTalk, {1, 2, 3, 4, 5, 6}""")
+
     def test_revTalk_norm(self):
         self.checkFile("reveal talk normal", frame="""sceIntro
 sceMain, my_sce
@@ -2145,7 +2219,7 @@ sceMove""")
 
     def test_breakPsy_null(self):
         self.checkFile("break psy null", frame="""sceIntro
-breakPsy
+breakPsy, null_case
 
 sceMain, my_sce
 
@@ -2154,10 +2228,11 @@ scePres
 sceLocks
 sceExam
 sceMove""")
-        
+
     def test_breakPsy_val(self):
         self.checkFile("break psy val", frame="""sceIntro
-breakPsy, 1
+breakPsy
+1
 
 sceMain, my_sce
 
@@ -2169,7 +2244,9 @@ sceMove""")
         
     def test_breakPsy_mixed(self):
         self.checkFile("break psy mixed", frame="""sceIntro
-breakPsy, 1, $1, 2, 3, 4, 5
+breakPsy
+1
+{1, 2, 3, 4, 5}
 
 sceMain, my_sce
 
@@ -2186,13 +2263,13 @@ sceMove""")
         self.checkFile("set health", frame="setHealth, 10")
         
     def test_redHealth(self):
-        self.checkFile("reduce health", frame="redHealth, $10")
+        self.checkFile("reduce health", frame="redHealth, {10}")
         
     def test_flashHealth(self):
         self.checkFile("flash health", frame="flashHealth, 10")
         
     def test_incHealth(self):
-        self.checkFile("increase health", frame="incHealth, $10")
+        self.checkFile("increase health", frame="incHealth, {10}")
         
     def test_setHealthErr(self):
         self.checkError((1, "int", "Health"), frame="setHealth, kumquat")
@@ -2205,48 +2282,67 @@ class Variables(FrameErrors):
     folder = "action"
     
     def test_playerIn_norm(self):
-        self.checkFile("playerIn norm", frame="playerIn, foo, s, true")
+        self.checkFile("playerIn norm", frame="""playerIn
+foo, s, true""")
         
     def test_playerIn_pass(self):
-        self.checkFile("playerIn pass", frame="playerIn, foo, float, _")
+        self.checkFile("playerIn pass", frame="""playerIn
+foo, float, _""")
         
     def test_playerIn_mixed(self):
-        self.checkFile("playerIn mixed", frame="playerIn, foo, f, true, $1, $2, _")
+        self.checkFile("playerIn mixed", frame="""playerIn
+foo, f, true
+{1}, {2}, _""")
         
     def test_playerIn_bad_type(self):
-        self.checkError((1, "bad key", "kumquat", "type"), frame="playerIn, foo, kumquat, true")
+        self.checkError((2, "bad key", "kumquat", "type"), frame="""playerIn
+foo, kumquat, true""")
 
     def test_varDef_norm(self):
-        self.checkFile("varDef norm", frame="varDef, foo, bar")
+        self.checkFile("varDef norm", frame="""varDef
+foo, bar""")
         
     def test_varDef_exp(self):
-        self.checkFile("varDef exp", frame="varDef, foo, bar, $1, $2")
+        self.checkFile("varDef exp", frame="""varDef
+foo, bar
+{1}, {2}""")
         
     def test_exp_var(self):
-        self.checkFile("expTest var", frame="""expTest, var, foo, my_anc, alpha, my_anc
+        self.checkFile("expTest var", frame="""expTest, var, foo, my_anc
+alpha, my_anc
 
 anc, my_anc""")
         
     def test_exp_exp(self):
-        self.checkFile("expTest exp", frame="""expTest, expression, foo, my_anc, alpha, my_anc
+        self.checkFile("expTest exp", frame="""expTest, expression, foo, my_anc
+alpha, my_anc
 
 anc, my_anc""")
         
     def test_exp_expr_mode(self):
-        self.checkFile("expTest expr mode", frame="""expTest, expression, foo, my_anc, alpha, my_anc, $1, $2
+        self.checkFile("expTest expr mode", frame="""expTest, expression, foo, my_anc
+alpha, my_anc
+{1}, {2}
 
 anc, my_anc""")
+        
+    def test_exp_expr_global(self):
+        self.checkFile("expTest expr global", frame="""anc, my_anc
+expTest, {alpha}, 2, 3, my_anc""")
         
     def test_exp_unk(self):
         self.checkError((1, "bad key", "kumquat", "variable"), frame="expTest, kumquat, 1, 2")
         
     def test_condit_norm(self):
-        self.checkFile("condit norm", frame="""condit, my_anc, expr, my_anc
+        self.checkFile("condit norm", frame="""condit, my_anc
+expr, my_anc
 
 anc, my_anc""")
     
     def test_condit_exp(self):
-        self.checkFile("condit exp", frame="""condit, my_anc, expr, my_anc, $1, $2
+        self.checkFile("condit exp", frame="""condit, my_anc
+expr, my_anc
+{1}, {2}
 
 anc, my_anc""")
 
@@ -2255,18 +2351,22 @@ class Input(FrameErrors):
     folder = "action"
     
     def test_choice(self):
-        self.checkFile("choice normal", frame="""choice, Your Choice, my_anc
+        self.checkFile("choice normal", frame="""choice
+Your Choice, my_anc
 
 anc, my_anc""")
         
     def test_choice_exp(self):
-        self.checkFile("choice exp", frame="""choice, Your Choice, my_anc, $1, $2
+        self.checkFile("choice exp", frame="""choice
+Your Choice, my_anc
+{1}, {2}
 
 anc, my_anc""")
         
     def test_choice_scene(self):
         self.checkFile("choice scene", frame="""sceIntro
-choice, Your Choice, my_anc
+choice
+Your Choice, my_anc
 
 sceMain
 
@@ -2283,7 +2383,8 @@ sceMain
 sceTalk
 scePres
 sceLocks
-choice, sealed, Your Choice, my_anc
+choice, sealed
+Your Choice, my_anc
 
 sceExam
 sceMove
@@ -2291,20 +2392,24 @@ anc, my_anc""")
 
     def test_askEv(self):
         self.checkFile("askEv normal", obj="""Evidence my_ev {
-}""", frame="""askEv, all, my_anc, my_ev, my_anc
+}""", frame="""askEv, all, my_anc
+my_ev, my_anc
 
 anc, my_anc""")
         
     def test_askEv_exp(self):
         self.checkFile("askEv exp", obj="""Evidence my_ev {
-}""", frame="""askEv, $a, $b, my_ev, my_anc, $1, 2, $3
+}""", frame="""askEv, {a}, {b}
+my_ev, my_anc
+{1, 2}, {3}
 
 anc, my_anc""")
         
     def test_askEv_scene(self):
         self.checkFile("askEv scene", obj="""Evidence my_ev {
 }""", frame="""sceIntro
-askEv, all, my_anc, my_ev, my_anc
+askEv, all, my_anc
+my_ev, my_anc
 
 sceMain
 
@@ -2322,18 +2427,21 @@ sceMain
 sceTalk
 scePres
 sceLocks
-askEv, sealed, all, my_anc, my_ev, my_anc
+askEv, sealed, all, my_anc
+my_ev, my_anc
 
 sceExam
 sceMove
 anc, my_anc""")
         
     def test_askEv_keyerr(self):
-        self.checkError((1, "bad key", "kumquat", "Permissible evidence"), frame="askEv, kumquat, my_anc, my_ev, my_anc")
+        self.checkError((1, "bad key", "kumquat", "Permissible evidence"), frame="""askEv, kumquat, my_anc
+my_ev, my_anc""")
         
     def test_askEv_badobj(self):
-        self.checkError((1, "type in set", "Item to present", "profiles, evidence"), obj="""Place my_ev {
-}""", frame="askEv, all, my_anc, my_ev, my_anc")
+        self.checkError((2, "type in set", "Item to present", "profiles, evidence"), obj="""Place my_ev {
+}""", frame="""askEv, all, my_anc
+my_ev, my_anc""")
 
     def test_point_exam_custom_place(self):
         self.checkFile("point exam custom", obj="""Place New_Place {
@@ -2342,22 +2450,28 @@ anc, my_anc""")
 anc, my_anc""")
         
     def test_point_exam_default_place(self):
-        self.checkFile("point exam default", frame="""point, black, my_anc
+        self.checkError((1, "bad key", "black", "place"), frame="""point, black, my_anc
 
 anc, my_anc""")
         
     def test_point_exam_polygon(self):
-        self.checkFile("point exam poly", frame="""point, black, my_anc, poly,1,15,40,194,249,137, my_anc
+        self.checkFile("point exam poly", obj="""Place New_Place {
+}""", frame="""point, New_Place, my_anc
+poly, 1, 15, 40, 194, 249, 137, my_anc
 
 anc, my_anc""")
         
     def test_point_exam_rect(self):
-        self.checkFile("point exam rect", frame="""point, black, my_anc, rect,35,128,217,182, my_anc
+        self.checkFile("point exam rect", obj="""Place New_Place {
+}""", frame="""point, New_Place, my_anc
+rect, 35, 128, 217, 182, my_anc
 
 anc, my_anc""")
         
     def test_point_exam_circ(self):
-        self.checkFile("point exam circ", frame="""point, black, my_anc, circle,86,28,92, my_anc
+        self.checkFile("point exam circ", obj="""Place New_Place {
+}""", frame="""point, New_Place, my_anc
+circle, 86, 28, 92, my_anc
 
 anc, my_anc""")
 
@@ -2365,32 +2479,49 @@ anc, my_anc""")
         self.checkError((1, "bad key", "kumquat", "place"), frame="point, kumquat, my_anc")
         
     def test_fake_shape(self):
-        self.checkError((1, "bad shape", "kumquat"), frame="point, black, my_anc, kumquat,1,2,3,4, my_anc")
+        self.checkError((2, "bad shape", "kumquat"), obj="""Place New_Place {
+}""", frame="""point, New_Place, my_anc
+kumquat, 1, 2, 3, 4, my_anc""")
         
     def test_poly_no_args(self):
-        self.checkError((1, "poly pair"), frame="point, black, my_anc, poly,1,2,3,4,5, my_anc")
+        self.checkError((2, "poly pair"), obj="""Place New_Place {
+}""", frame="""point, New_Place, my_anc
+poly, 1, 2, 3, 4, 5, my_anc""")
         
     def test_poly_less_six(self):
-        self.checkError((1, "poly 6"), frame="point, black, my_anc, poly,1,2,3,4, my_anc")
+        self.checkError((2, "poly 6"), obj="""Place New_Place {
+}""", frame="""point, New_Place, my_anc
+poly, 1, 2, 3, 4, my_anc""")
         
     def test_circ_not_3(self):
-        self.checkError((1, "circle 3"), frame="point, black, my_anc, circle,1,2,3,4, my_anc")
+        self.checkError((2, "circle 3"), obj="""Place New_Place {
+}""", frame="""point, New_Place, my_anc
+circle, 1, 2, 3, 4, my_anc""")
         
     def test_rect_not_4(self):
-        self.checkError((1, "rect 4"), frame="point, black, my_anc, rect,1,2,3, my_anc")
-        
+        self.checkError((2, "rect 4"), obj="""Place New_Place {
+}""", frame="""point, New_Place, my_anc
+rect, 1, 2, 3, my_anc""")
+
     def test_rect_quad_4(self):
-        self.checkError((1, "rect to quad 4"), frame="point, black, my_anc, rect,3,4,1,2, my_anc")
-        
+        self.checkError((2, "rect to quad 4"), obj="""Place New_Place {
+}""", frame="""point, New_Place, my_anc
+rect, 3, 4, 1, 2, my_anc""")
+
     def test_rect_negative(self):
-        self.checkError((1, "min", "All arguments after polygon shape", 0), frame="point, black, my_anc, rect,1,-2,3,4, my_anc")
-        
+        self.checkError((2, "min", "All arguments after polygon shape", 0), obj="""Place New_Place {
+}""", frame="""point, New_Place, my_anc
+rect, 1, -2, 3, 4, my_anc""")
+
     def test_point_expr(self):
-        self.checkFile("point expr", frame="point, $1, $2, $3, $4")
+        self.checkError((1, "no exp", "place"), frame="""point, {1}, {2}
+{3}, {4}""")
 
     def test_point_scene(self):
-        self.checkFile("point scene", frame="""sceIntro
-point, black, my_anc, rect,35,128,217,182, my_anc
+        self.checkFile("point scene", obj="""Place New_Place {
+}""", frame="""sceIntro
+point, New_Place, my_anc
+rect, 35, 128, 217, 182, my_anc
 
 sceMain
 
@@ -2401,13 +2532,15 @@ sceMove
 anc, my_anc""")
 
     def test_point_lock(self):
-        self.checkFile("point locks", frame="""sceIntro
+        self.checkFile("point locks", obj="""Place New_Place {
+}""", frame="""sceIntro
 sceMain
 
 sceTalk
 scePres
 sceLocks
-point, sealed, black, my_anc, rect,35,128,217,182, my_anc
+point, sealed, New_Place, my_anc
+rect, 35, 128, 217, 182, my_anc
 
 sceExam
 sceMove

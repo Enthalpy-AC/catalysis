@@ -37,9 +37,24 @@ class FrameParser(object):
                 self.escape_dict[punctuation] = "[#{}]".format(
                     self.config_dict[punctuation])
 
+    def post_command_cleanup(self):
+        '''Perform validation after ending a frame, and clear action_mult.'''
+        pos_list = [n["position"] for n in (
+            self.executor.frame["characters"])]
+        # Check if positions are duplicated...
+        # If no place is set, there is only one available position,
+        # so a repeat position means multiple characters.'''
+        if len(pos_list) > len(set(pos_list)):
+            if self.executor.frame["place"]:
+                raise Invalid("mult char pos")
+            raise Invalid("mult char no place")
+        # Clear the "expecting this kind of action".
+        self.executor.action_mult = {}
+
     def blank(self):
         '''Tell the parser to expect initiation of a new frame, and handle
         the queue of lines to wrap. Run on blank lines.'''
+        self.post_command_cleanup()
         if self.executor.frame["merged_to_next"]:
             self.line_queue.append("")
         else:
@@ -61,19 +76,17 @@ class FrameParser(object):
         new command and do some data valdiation.'''
         def func(match):
             r'''Function that handles escaping of comma-space, curly brackets
-            and newline. Syntactical "{" are matched with "$", while "}" are 
-            removed. Due to expression syntax and the dialogue command, 
+            and newline. Syntactical "{" are matched with "$", while "}" are
+            removed. Due to expression syntax and the dialogue command,
             \ escape may not be safe.'''
             match = match.group(1)
             # Match \\ so they don't interfere with matching.
             # It may not be safe to treat them as an escaped \ yet.
             return {", ": "\n", r"\\": r"\\", "\\, ": ", ", "\\,": ",",
-                    ",": "\n", "\\{":"{", "\\}":"}", "{":"$", "}":""}[match]
-
+                    ",": "\n"}[match]
         # Split at a comma-space and preserves escape characters,
         # but replaces non-escaped "{" and "}" with "$" and "" respectively.
-        command_list = re.sub(r"(\\\\|\\, |, |\\,|,|\\{|\\}|{|})",
-                              func, line).split("\n")
+        command_list = re.sub(r"(\\\\|\\, |, |\\,|,)", func, line).split("\n")
         # Seek a terminal colon, being wary of the possibility of escape.
         colon_match = re.search(r"(\\)*:$", command_list[-1])
         start_dialogue = False
@@ -85,8 +98,12 @@ class FrameParser(object):
                 # Colon not escaped. Remove it, and mark dialogue to start.
                 start_dialogue = True
                 command_list[-1] = command_list[-1][:-1]
-
-        self.command(command_list)
+        if self.executor.action_mult:
+            command_list.insert(0, self.executor.action_mult["type"] + "_type")
+            validate = False
+        else:
+            validate = True
+        self.command(command_list, validate)
 
         # If the command is run as part of a macro, it can't end a frame.
         if macro:
@@ -97,18 +114,10 @@ class FrameParser(object):
             return self.command_process
         # Dialogue is set to start - validate current places and positions.
         else:
-            pos_list = [n["position"] for n in (
-                self.executor.frame["characters"])]
-            # Check if positions are duplicated...
-            # If no place is set, there is only one available position,
-            # so a repeat position means multiple characters.'''
-            if len(pos_list) > len(set(pos_list)):
-                if self.executor.frame["place"]:
-                    raise Invalid("mult char pos")
-                raise Invalid("mult char no place")
+            self.post_command_cleanup()
             return self.dialogue
 
-    def command(self, command_list):
+    def command(self, command_list, validate=True):
         '''Run the command in the sequence:
         command->macro->sprite->speaker.'''
 
@@ -121,8 +130,7 @@ class FrameParser(object):
                 return slash if slash else ""
 
         # Convert the first word to a functional name.
-        lead_word = command_list.pop(0).strip().replace(r"\\", "\\")
-
+        lead_word = command_list.pop(0).replace(r"\\", "\\")
 
         # Assuming it's a Catalysis frame function, we need to transform the
         # camelCase to an underscore_version.
@@ -131,7 +139,11 @@ class FrameParser(object):
         # The if checks if it is, in fact, a frame function.
         if func_name in frame_library.method_names:
             func = getattr(self.executor, func_name)
-            self.validate_context(func)
+            # Run context validation. This is skipped for action multiple
+            # arguments. Validation has already occurred, and we want the
+            # multiplicity function to bypass the no_manual check.
+            if validate:
+                self.validate_context(func)
             # Purge terminal underscores.
             command_list = [re.sub(
                 r"(\\*)(_)$", underscore_purge, x) for x in command_list]
@@ -264,26 +276,16 @@ class FrameParser(object):
             "_(.)", lambda match: match.group(1).upper(), command.__name__)
         location = self.executor.location
         dict_fragment = validation_dict[location]
-        merged = self.executor.frame["merged_to_next"] or (
-            command == self.executor.merge)
-        try:
-            merge_lock = "not merged" in self.executor.frame[
-                "action_parameters"]["context"]
-        except (KeyError, TypeError):
-            merge_lock = False
-        merge_lock = merge_lock or hasattr(command, "merge_lock")
 
         # Validate the command can be called manually, isn't scene-only,
-        # doesn't have a merge problem, and isn't overriding an acton.
+        # and doesn't have a merge problem.
         if hasattr(command, "no_manual"):
             raise Invalid("ban manual", name)
         if hasattr(command, "scene_only") and (
                 not self.executor.location.startswith("sce")):
             raise Invalid("enforce scene", name)
-        if hasattr(command, "action") and self.executor.frame[
-                "action_name"]:
-            raise Invalid("one action", name)
-        if merged and merge_lock:
+        if self.executor.frame["merged_to_next"] and (
+                hasattr(command, "merge_lock")):
             raise Invalid("ban on merge", name)
 
         # Validate the command is acceptable in this location.

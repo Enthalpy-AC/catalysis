@@ -47,13 +47,15 @@ class ObjectParser(object):
         except AttributeError:
             pass
         else:
-            # Validate object names, and store the objects.
             if name:
+                # Validate the object names...
                 if name in self.using_objects:
                     raise Invalid("ban duplicate", "Object", name)
                 if name in object_classes.reserved_names:
                     raise Invalid("ban obj name", name)
+                # Store the object name for later...
                 self.using_objects[name] = self.active_object
+                # And make the handle the name unless overriden...
                 if object_type.capitalize() == "Profile":
                     self.active_object.redefine("long", name)
                     self.active_object.redefine("short", name)
