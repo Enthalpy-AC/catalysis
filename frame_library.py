@@ -26,10 +26,15 @@ class Library(object):
         self.frame = {"merged_to_next": False}
         self.location = ""
         self.action_mult = {}
-        # talk and talk_sce are separate! Each talk anchor needs a related
+        # talk and talk scene are separate! Each talk anchor needs a related
         # anchor for the scene, even if no global scene anchor has been made.
         self.anc_dict = {x: {"destination": set(), "value": {}} for x in {
-            "frames", "scenes", "talk", "talk_sce"}}
+            "frame", "scene", "talk", "talk scene", "evidence", "profile"}}
+        for item, val in object_dict.iteritems():
+            if val.attribute in {"profiles", "evidence"}:
+                attr = "profile" if val.attribute == "profiles" else (
+                    val.attribute)
+                self.anc_dict[attr]["value"][item] = val.data["id"]
         self.scene_dia = {}
         self.check_locks = set()
         self.from_object_dict = functools.partial(
@@ -426,7 +431,7 @@ class Library(object):
         for contra in contras:
             if contra["contrad_elt"] == type_dict:
                 raise Invalid("mult contra", item)
-        self.anc_dict["frames"]["destination"].add((
+        self.anc_dict["frame"]["destination"].add((
             "cross_examinations", self.cross["id"], "statements",
             self.statement_index, "contradictions", len(contras),
             "destination"))
@@ -435,9 +440,9 @@ class Library(object):
     def anc(self, point):
         '''Set an anchor. Point is the 'anchor phrase.' Anchor can be used in
         any frame with dialogue.'''
-        if point in self.anc_dict["frames"]["value"]:
+        if point in self.anc_dict["frame"]["value"]:
             raise Invalid("anc dupl", point)
-        self.anc_dict["frames"]["value"][point] = self.frame["id"]
+        self.anc_dict["frame"]["value"][point] = self.frame["id"]
 
     @special
     def sce_intro(self, name="", hidden=False):
@@ -500,9 +505,9 @@ class Library(object):
             "scene_id": "val="+str(self.scene["id"]),
             "section_type": "val=dialogues", "section_id": "val=1"}}}
         if anc:
-            if anc in self.anc_dict["scenes"]["value"]:
+            if anc in self.anc_dict["scene"]["value"]:
                 raise Invalid("anc dupl", anc)
-            self.anc_dict["scenes"]["value"][anc] = self.scene["id"]
+            self.anc_dict["scene"]["value"][anc] = self.scene["id"]
 
     @special
     def sce_talk(self):
@@ -534,7 +539,7 @@ class Library(object):
             if anc in self.anc_dict["talk"]["value"]:
                 raise Invalid("anc dupl", anc)
             self.anc_dict["talk"]["value"][anc] = talk_id
-            self.anc_dict["talk_sce"]["value"][anc] = self.scene["id"]
+            self.anc_dict["talk scene"]["value"][anc] = self.scene["id"]
         self.make_frame()
 
     @no_manual
@@ -715,7 +720,7 @@ class Library(object):
         self.scene["end"] = self.frame["id"]
         object_list = list_to_n_tuple(argv, 2)
         for i, j in object_list:
-            self.anc_dict["scenes"]["destination"].add((
+            self.anc_dict["scene"]["destination"].add((
                 "scenes", self.scene["id"], "move_list",
                 len(self.scene["move_list"]), "scene_id"))
             self.scene["move_list"].append({
@@ -1192,7 +1197,7 @@ class Library(object):
     def frame_exp(self, anc_terms):
         '''Add the specified frame location to the list of frames to
         replace.'''
-        self.anc_dict["frames"]["destination"].add(
+        self.anc_dict["frame"]["destination"].add(
             ("frames", self.frame["id"], "action_parameters") + anc_terms)
 
     @no_manual
@@ -1278,7 +1283,7 @@ class Library(object):
     def scene_exp(self, scene, anc_terms, talk=False):
         '''Convert a tuple representing a scene from user-input to
         editor form.'''
-        anc_cat = "talk_sce" if talk else "scenes"
+        anc_cat = "talk scene" if talk else "scene"
         if scene[0] == "val":
             scene.insert(1, "scenes")
         self.anc_dict[anc_cat]["destination"].add((
@@ -1290,7 +1295,7 @@ class Library(object):
         '''Convert a tuple representing dialogue from user-input to editor
         form.'''
         dialogue = self.scene_exp(dialogue, anc_terms_sce, talk)
-        anc_cat = "talk_sce" if talk else "scenes"
+        anc_cat = "talk scene" if talk else "scene"
         if dialogue[0] == "val":
             dialogue += ["dialogues", "1"]
         self.anc_dict[anc_cat]["destination"].add((
@@ -1305,7 +1310,7 @@ class Library(object):
         if talk[0] == "val":
             # The scene anchor name is also the talk anchor name in val mode.
             talk += ["talk_topics", talk[2]]
-        self.anc_dict["talk_sce"]["destination"].add((
+        self.anc_dict["talk scene"]["destination"].add((
             "frames", self.frame["id"], "action_parameters") + anc_talk_1)
         self.anc_dict["talk"]["destination"].add((
             "frames", self.frame["id"], "action_parameters") + anc_talk_2)

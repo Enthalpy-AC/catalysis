@@ -19,7 +19,7 @@ def expression_pack(arguments, schema, pad=False, back=""):
         if match.group(0) in {"{", "}"}:
             raise Invalid("dummy")
         return {r"\\": "\\", r"\$": "$", "$": "\n", r"\}": "}",
-                r"\{": "}"}[match.group()]
+                r"\{": "}", r"\:": ":", ":": "\r"}[match.group()]
 
     def repl_default(match):
         '''Replace when Catalysis variables are not allowed.'''
@@ -62,11 +62,16 @@ def expression_pack(arguments, schema, pad=False, back=""):
                     # Handle $, \, and Catalysis variables.
                     try:
                         tag = re.sub(
-                            r"\\(\\|\$|\{, \})|\{|\}|\$", repl_custom, arg)
+                            r"\\(\\|\$|\{|\}|:)|\{|\}|\$|:", repl_custom, arg)
                     except Invalid:
                         raise Invalid("unescaped brace", arg)
                     if tag.count("\n") % 2:
                         raise Invalid("$ syntax", arg)
+                    # Now, check whether the : pattern is right.
+                    if not re.search(
+                            r"^[^\r\n]*(\n[^\r\n]*\r?[^\r\n]*\n[^\r\n]*)*$",
+                            tag):
+                        raise Invalid(": syntax", arg)
                     subbed_args.append(tag)
                 # Prefix the argument list and add the subunit.
                 unit.append(["xpr"] + subbed_args)

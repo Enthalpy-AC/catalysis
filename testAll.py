@@ -1402,7 +1402,7 @@ contra, kumquat, objectionable
 contra, kumquat, fake""")
             
     def test_no_contra_anc(self):
-        self.checkError(("end of file", "anc unset", "frames", "objectionable"), obj="""Profile obj {
+        self.checkError(("end of file", "anc unset", "frame", "objectionable"), obj="""Profile obj {
 }
 
 Profile kumquat {
@@ -1865,7 +1865,32 @@ kumquat}""")
         self.checkFile("anchor expression", frame="""setOver, {$my_over$}
 
 anc, my_over""")
+
+    def test_exterior_colon(self):
+        self.checkError((2, ": syntax", "kumquat:"), frame="""varDef
+{kumquat:}, 2""")
         
+    def test_double_colon(self):
+        self.checkError((2, ": syntax", "$frame: anc: hor$"), frame="""varDef
+{$frame: anc: hor$}, 2""")
+        
+    def test_unk_anc_type(self):
+        self.checkError(("end of file", "unk anc type", "failure"), frame="""varDef
+{$failure: anchor$}, 2""")
+        
+    def test_anc_unset(self):
+        self.checkError(("end of file", "anc unset", "evidence", "anchor"), frame="""varDef
+{$evidence: anchor$}, 2""")
+        
+    def test_colon_var(self):
+        self.checkFile("colon var", frame="""varDef
+12:34, 5""")
+
+    def test_colon_xpr(self):
+        self.checkFile("colon exp", obj="""Evidence Badge {
+}""", frame="""varDef
+is_badge_revealed, {evidence_is_revealed('preuve'\, $evidence: Badge$)}""")
+
     def test_colon_terminate(self):
         self.checkFile("colon terminate", frame="""varDef
 foo, bar:
@@ -2032,7 +2057,7 @@ my_place, my_obj""")
     def test_revObj_exp(self):
         self.checkFile("reveal object exp", obj="""Place street {
 }""", frame="""revObj
-{$street$}, {'foreground', 'object':}""")
+{$street$}, {'foreground', 'object'\:}""")
 
     def test_hideObj_mixed_err(self):
         self.checkError((2, "exp dependency"), obj="""Place my_place {

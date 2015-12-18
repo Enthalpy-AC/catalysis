@@ -209,8 +209,7 @@ class FrameParser(object):
 
     def cleanup(self):
         '''Cleanup actions to be run when the parser ends. Run blank again
-        to word wrap, run anchor replacements, and do some validation.
-        Then, end tKinter.'''
+        to word wrap, run anchor replacements, and do some validation.'''
 
         # Run end-frame processing.
         self.blank()
@@ -221,6 +220,37 @@ class FrameParser(object):
             for key in args:
                 item = item[key]
             return item
+
+        def repl_func(match):
+            '''Function to perform anchor replacement when the anchor is not
+            known in advance.'''
+            anchor_type = match.group(1).lower().strip()
+            anchor = match.group(2)
+            try:
+                anc_dict = self.executor.anc_dict[anchor_type]["value"]
+            except KeyError:
+                raise Invalid("unk anc type", anchor_type)
+            try:
+                return str(anc_dict[anchor])
+            except KeyError:
+                raise Invalid("anc unset", anchor_type, anchor)
+
+        def recurse_and_anc_replace(json_item):
+            '''Function to recurse over an iterable and perform anchor
+            replacement on all scalars.'''
+            iterable = json_item.iteritems() if isinstance(
+                json_item, dict) else enumerate(json_item)
+            # Key is only a real key if this is a dictionary. It's an
+            # index if this is a list, but the point is the same.
+            for key, value in iterable:
+                if isinstance(value, (list, dict)):
+                    recurse_and_anc_replace(value)
+                else:
+                    json_item[key] = re.sub(
+                        r"\n(.*)\r ?(.*)\n", repl_func, value)
+
+        for frame in self.executor.trial["frames"][1:]:
+            recurse_and_anc_replace(frame["action_parameters"])
 
         # Do all anchor replacement.
         for key, value in self.executor.anc_dict.iteritems():

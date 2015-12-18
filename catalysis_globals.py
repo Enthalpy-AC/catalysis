@@ -215,6 +215,7 @@ err_dict = {
         "An unexpected, unescaped brace was found for " +
         "argument {}."
     ),
+    "unk anc type": "Anchor type {} is not recognized.",
     "unk line": "Line not recognized. Check for typos.",
     "unk obj": "{} is not a recognized object.",
     "unk pre": "{} is not a recognized prefix.",
@@ -228,5 +229,6 @@ err_dict = {
     "$ syntax": (
         "Expression argument {} contained an odd number of unescaped $ " +
         "symbols."
-    )
+    ),
+    ": syntax": "Expression argument {} had an unexpected syntactic colon."
 }
