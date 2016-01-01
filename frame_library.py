@@ -666,7 +666,7 @@ class Library(object):
         avoid arguments for the default.'''
         if self.location == "sceExamConvo":
             self.sce_exam_end()
-            exam = self.exam_exp("val", argv[0], list(argv[1:]))[1]
+            exam = self.exam_exp("val", list(argv))[1]
             exam_dict = {
                 "start": self.frame["id"], "end": 0,
                 "area": exam}
@@ -1113,12 +1113,14 @@ class Library(object):
         button is prepended to the argument list if in a scene.'''
         self.frame["action_name"] = "PointArea"
         place, frame = self.input_helper((1, 1), *argv)
-        # AAO doesn't support expressions or default places for this
-        # action yet. Remove kill_exp and built_dict kwargs, respectively,
-        # when those get fixed.
-        place = self.place_exp(place, built_dict={}, kill_exp=True)
-        snip = {"background": param(place, 1), "failure_dest": param(frame, 1)}
-        self.frame["action_parameters"]["global"].update(snip)
+        # AAO doesn't support default places for this action yet. Remove
+        # the built_dict kwarg when that gets fixed.
+        # Only the GUI for point expressions isn't there. We can still use
+        # the actual expressions, or Endless Nine wouldn't work. No need for
+        # kill_exp.
+        place = self.place_exp(place, built_dict={})
+        self.frame["action_parameters"]["global"].update(
+            {"background": param(place, 1), "failure_dest": param(frame, 1)})
         self.frame_exp(("global", "failure_dest"))
         self.frame["action_parameters"]["multiple"]["area"] = []
 
@@ -1331,7 +1333,7 @@ class Library(object):
         return descript
 
     @no_manual
-    def exam_exp(self, parse_instr, shape, pieces):
+    def exam_exp(self, parse_instr, pieces):
         '''Convert a tuple representing a region to select from user-input to
         editor form.'''
         def poly(pieces):
@@ -1355,6 +1357,7 @@ class Library(object):
                 raise Invalid("rect to quad 4")
 
         if parse_instr == "val":
+            shape = pieces.pop(0)
             try:
                 {"poly": poly, "circle": circle, "rect": rect}[
                     shape](pieces)
@@ -1362,7 +1365,11 @@ class Library(object):
                 raise Invalid("bad shape", shape)
             for coord in pieces:
                 int_at_least(coord, 0, "All arguments after polygon shape")
-        return [parse_instr, shape + ":" + ",".join(pieces)]
+            pieces = shape + ":" + ",".join(pieces)
+        else:
+            pieces = ",".join(pieces)
+ 
+        return [parse_instr, pieces]
 
     @no_manual
     def ev_pos_type(self, *argv):
@@ -1447,15 +1454,16 @@ class Library(object):
         })
 
     @no_manual
-    def exam_frame_type(self, region, shape, *argv):
+    def exam_frame_type(self, *argv):
         '''Function to handle examination and frame pairs as a multiple
         parameter.'''
-        first_group = [region, shape] + list(argv[:-1])
-        fixed_args = [','.join(first_group), argv[-1]]
+        if len(argv) < 2:
+            raise Invalid("bad arg num", "examination region selector")
+        fixed_args = [','.join(argv[:-1]), argv[-1]]
         exam, frame = expression_pack(fixed_args, (1, 1))
         insert = self.frame["action_parameters"]["multiple"]["area"]
         items = exam[1].split(",")
-        exam = self.exam_exp(exam[0], items[0], items[1:])
+        exam = self.exam_exp(exam[0], items)
         self.frame_exp(("multiple", "area", len(insert), "area_dest"))
         insert.append({
             "area_def": param(exam, 1), "area_dest": param(frame, 1)})

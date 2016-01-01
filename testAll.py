@@ -2549,8 +2549,13 @@ rect, 3, 4, 1, 2, my_anc""")
 rect, 1, -2, 3, 4, my_anc""")
 
     def test_point_expr(self):
-        self.checkError((1, "no exp", "place"), frame="""point, {1}, {2}
+        self.checkFile("point expr", frame="""point, {1}, {2}
 {3}, {4}""")
+        
+    def test_point_one_arg(self):
+        self.checkError((2, "bad arg num", "examination region selector"), frame="""point, {1}, {2}
+{3}""")
+        
 
     def test_point_scene(self):
         self.checkFile("point scene", obj="""Place New_Place {
