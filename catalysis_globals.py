@@ -131,6 +131,7 @@ err_dict = {
     "ban duplicate": "{} name {} is used twice.",
     "bad arg num": "Command {} does not have the proper number of arguments.",
     "bad context": "A command {} must be {}one of: {}.",
+    "bad exam type": "Received point command {}, instead of one of: {}.",
     "bad exp number": (
         "Argument {} received {} pieces of an expression instead of {}."
     ),

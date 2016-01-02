@@ -2503,21 +2503,21 @@ anc, my_anc""")
     def test_point_exam_polygon(self):
         self.checkFile("point exam poly", obj="""Place New_Place {
 }""", frame="""point, New_Place, my_anc
-poly, 1, 15, 40, 194, 249, 137, my_anc
+region, poly, 1, 15, 40, 194, 249, 137, my_anc
 
 anc, my_anc""")
         
     def test_point_exam_rect(self):
         self.checkFile("point exam rect", obj="""Place New_Place {
 }""", frame="""point, New_Place, my_anc
-rect, 35, 128, 217, 182, my_anc
+region, rect, 35, 128, 217, 182, my_anc
 
 anc, my_anc""")
         
     def test_point_exam_circ(self):
         self.checkFile("point exam circ", obj="""Place New_Place {
 }""", frame="""point, New_Place, my_anc
-circle, 86, 28, 92, my_anc
+region, circle, 86, 28, 92, my_anc
 
 anc, my_anc""")
 
@@ -2527,52 +2527,52 @@ anc, my_anc""")
     def test_fake_shape(self):
         self.checkError((2, "bad shape", "kumquat"), obj="""Place New_Place {
 }""", frame="""point, New_Place, my_anc
-kumquat, 1, 2, 3, 4, my_anc""")
+region, kumquat, 1, 2, 3, 4, my_anc""")
         
     def test_poly_no_args(self):
         self.checkError((2, "poly pair"), obj="""Place New_Place {
 }""", frame="""point, New_Place, my_anc
-poly, 1, 2, 3, 4, 5, my_anc""")
+region, poly, 1, 2, 3, 4, 5, my_anc""")
         
     def test_poly_less_six(self):
         self.checkError((2, "poly 6"), obj="""Place New_Place {
 }""", frame="""point, New_Place, my_anc
-poly, 1, 2, 3, 4, my_anc""")
+region, poly, 1, 2, 3, 4, my_anc""")
         
     def test_circ_not_3(self):
         self.checkError((2, "circle 3"), obj="""Place New_Place {
 }""", frame="""point, New_Place, my_anc
-circle, 1, 2, 3, 4, my_anc""")
+region, circle, 1, 2, 3, 4, my_anc""")
         
     def test_rect_not_4(self):
         self.checkError((2, "rect 4"), obj="""Place New_Place {
 }""", frame="""point, New_Place, my_anc
-rect, 1, 2, 3, my_anc""")
+region, rect, 1, 2, 3, my_anc""")
 
     def test_rect_quad_4(self):
         self.checkError((2, "rect to quad 4"), obj="""Place New_Place {
 }""", frame="""point, New_Place, my_anc
-rect, 3, 4, 1, 2, my_anc""")
+region, rect, 3, 4, 1, 2, my_anc""")
 
     def test_rect_negative(self):
         self.checkError((2, "min", "All arguments after polygon shape", 0), obj="""Place New_Place {
 }""", frame="""point, New_Place, my_anc
-rect, 1, -2, 3, 4, my_anc""")
+region, rect, 1, -2, 3, 4, my_anc""")
 
     def test_point_expr(self):
         self.checkFile("point expr", frame="""point, {1}, {2}
-{3}, {4}""")
+region, {3}, {4}""")
         
     def test_point_one_arg(self):
         self.checkError((2, "bad arg num", "examination region selector"), frame="""point, {1}, {2}
-{3}""")
+region, {3}""")
         
 
     def test_point_scene(self):
         self.checkFile("point scene", obj="""Place New_Place {
 }""", frame="""sceIntro
 point, New_Place, my_anc
-rect, 35, 128, 217, 182, my_anc
+region, rect, 35, 128, 217, 182, my_anc
 
 sceMain
 
@@ -2591,10 +2591,46 @@ sceTalk
 scePres
 sceLocks
 point, sealed, New_Place, my_anc
-rect, 35, 128, 217, 182, my_anc
+region, rect, 35, 128, 217, 182, my_anc
 
 sceExam
 sceMove
+anc, my_anc""")
+
+    def test_point_object(self):
+        self.checkFile("point object", obj="""Place My Place {
+}
+
+My Place foreground {
+name: FGO
+}""", frame="""point, My Place, my_anc
+object, FGO, my_anc
+
+anc, my_anc""")
+        
+#===============================================================================
+# TODO: Uncomment this when AAO finally supports examining built-ins.
+#     def test_point_object_default(self):
+#         self.checkFile("point object default", frame="""point, aj court, my_anc
+# object, null, my_anc
+# 
+# anc, my_anc""")
+#===============================================================================
+
+    def test_point_fake_object(self):
+        self.checkError((2, "missing subobj", "kumquat"), obj="""Place My Place {
+}
+
+My Place foreground {
+name: FGO
+}""", frame="""point, My Place, my_anc
+object, kumquat, my_anc""")
+
+    def test_point_bad_type(self):
+        self.checkError((2, "bad exam type", "kumquat", "region, object"), obj="""Place My Place {
+}""", frame="""point, My Place, my_anc
+kumquat, circle, 1, 2, 3, my_anc
+
 anc, my_anc""")
 
 class Macro_Tests(MacroErrors):

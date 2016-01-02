@@ -1108,7 +1108,7 @@ class Library(object):
         self.frame["action_parameters"]["multiple"]["element"] = []
 
     @merge_lock
-    @action({"type": "exam_frame"})
+    @action({"type": "ambig_exam_frame"})
     def point(self, *argv):
         '''Call on the player to point to an area. Arguments are background,
         target frame ID, a region term, and a target frame anchor. A back
@@ -1262,14 +1262,16 @@ class Library(object):
         return place
 
     @no_manual
-    def bg_fg_obj_exp(self, bg_fg_obj, place, built_dict):
+    def bg_fg_obj_exp(self, bg_fg_obj, place, built_dict, got_id = False):
         '''Convert a tuple representing a background or foreground object from
         user-input to editor form.'''
-        place = self.place_exp(place, built_dict)
+        if not got_id:
+            place = self.place_exp(place, built_dict)
         # If the object is an expression, no need to fix.
         if bg_fg_obj[0] != "val":
             return place, bg_fg_obj
         # It isn't possible to fix an expression's object.
+
         if place[0] != "val":
             raise Invalid("exp dependency")
 
@@ -1457,19 +1459,34 @@ class Library(object):
         })
 
     @no_manual
-    def exam_frame_type(self, *argv):
+    def ambig_exam_frame_type(self, *argv):
         '''Function to handle examination and frame pairs as a multiple
-        parameter.'''
-        if len(argv) < 2:
+        parameter. Examination items can be either objects or regions.'''
+        # Validate that there are enough arguments for the procedure to work.
+        if len(argv) < 3:
             raise Invalid("bad arg num", "examination region selector")
-        fixed_args = [','.join(argv[:-1]), argv[-1]]
+        # The first and last args are special, but the rest are parsed as one.
+        exam_type = argv[0]
+        fixed_args = [','.join(argv[1:-1]), argv[-1]]
         exam, frame = expression_pack(fixed_args, (1, 1))
         insert = self.frame["action_parameters"]["multiple"]["area"]
         items = exam[1].split(",")
-        exam = self.exam_exp(exam[0], items)
+        if exam_type.lower() == "region":
+            exam = self.exam_exp(exam[0], items)
+            exam = param(exam, 1)
+        elif exam_type.lower() == "object":
+            prefix, place_id = self.frame["action_parameters"]["global"][
+                "background"].split("=", 1)
+            _, exam = self.bg_fg_obj_exp(
+                exam, [prefix, int(place_id)], {}, True)
+            exam = {"place_id": self.frame["action_parameters"]["global"][
+                "background"], "layer": param(exam, 1),
+                "id": param(exam, 2)}
+        else:
+            raise Invalid("bad exam type", exam_type, "region, object")
         self.frame_exp(("multiple", "area", len(insert), "area_dest"))
         insert.append({
-            "area_def": param(exam, 1), "area_dest": param(frame, 1)})
+            "area_def": exam, "area_dest": param(frame, 1)})
 
     @no_manual
     def input_type(self, *argv):
