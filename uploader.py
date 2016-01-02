@@ -73,4 +73,10 @@ def upload(directory, upload_dict):
         print "Unable to login to AAO."
 
     upload_data(directory, upload_dict)
-    open_browser(upload_dict)
+    print(
+        "Complete! If you are logged into Firefox on AAO, we will now open"
+        "this in the editor.")
+    try:
+        open_browser(upload_dict)
+    except webbrowser.Error:
+        pass
