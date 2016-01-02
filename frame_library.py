@@ -103,7 +103,7 @@ class Library(object):
         obj = self.from_object_dict(name, {"sounds"}, "Sound to play")
         self.frame["sound"] = obj.data["id"]
 
-    def place(self, name=-1, position="center"):
+    def place(self, name="black", position="center"):
         '''Set the place.'''
         self.frame["place"] = self.place_exp(["val", name], kill_exp=True)[1]
         if self.frame["characters"]:

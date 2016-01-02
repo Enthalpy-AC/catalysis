@@ -94,7 +94,7 @@ class ObjectPopups(ObjectErrors):
         self.checkFile("popup base", obj="""Popup {
         base: objection
         }""")
-        
+
 class ObjectSound(ObjectErrors):
     
     folder = "object"
@@ -1023,10 +1023,13 @@ class Frame_Commands(FrameErrors):
     def test_place(self):
         self.checkFile("place", obj="""Place Foo {
 }""", frame="place, Foo")
-        
+
     def test_place_default(self):
+        self.checkFile("place default", frame="place")
+
+    def test_place_builtin(self):
         self.checkFile("place default", frame="place, black")
-                        
+
     def test_place_error(self):
         self.checkError((1, "bad key", "Foo", "place"), obj="""Popup Foo {
 }""", frame="place, Foo")
