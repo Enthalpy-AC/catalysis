@@ -1279,6 +1279,7 @@ class Library(object):
             bg_fg_obj = ("val", layer, sub_id)
         else:
             bg_fg_obj = ("val", "foreground_objects", 1)
+
         return place, bg_fg_obj
 
     @no_manual

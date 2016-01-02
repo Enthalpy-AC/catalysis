@@ -29,9 +29,6 @@ class ObjectParser(object):
             "!": "250", ",": "125", "-": "200", "?": "250", "...": "500",
             ";": "200", ":": "200"
         }
-        self.automate_dict = {
-            "username": False, "password": False, "id": False
-        }
 
     def no_macro(self, line):
         '''Handle parsing while not inside a macro.'''
@@ -82,23 +79,6 @@ class ObjectParser(object):
                 value, 0, "Configuration attribute " + attr)
         return self.config
 
-
-    def automate(self, line):
-        '''Handle parsing while inside an automation block.'''
-        if line == "}":
-            return self.no_macro
-        try:
-            attr, value = re.split(": ?", line, maxsplit=1)
-        except ValueError:
-            raise Invalid("config colon")
-        if attr not in self.automate_dict:
-            raise Invalid("config attr", attr)
-        if attr == "id":
-            int_at_least(value, 0, "Trial id " + attr)
-        self.automate_dict[attr] = value
-        return self.automate
-
-
     def in_comment(self, line):
         '''Handles parsing inside a mutliline comment.'''
         if line.endswith("*/"):
@@ -145,4 +125,4 @@ def parse_file(directory, macro_test):
         print sys.exc_info()[1].message.format("end of file", file_name)
         terminate()
     parser.config_dict["…"] = parser.config_dict.pop("...")
-    return parser.macro_dict, parser.config_dict, parser.automate_dict
+    return parser.macro_dict, parser.config_dict

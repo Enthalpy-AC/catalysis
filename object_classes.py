@@ -80,7 +80,7 @@ class Profile(JSONRow):
 
     def new_base(self, sprite, active=False):
         '''Set the base attribute, which controls the default icon and
-        sprites. '''
+        sprites.'''
         if active:
             self.data["base"] = sprite
         else:

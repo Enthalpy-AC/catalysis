@@ -28,8 +28,7 @@ try:
         directory, upload_dict = upload_parser.parse_file()
     else:
         directory = "test_lib"
-    macro_dict, config_dict, auto_dict = macro_parser.parse_file(
-        directory, macro_test)
+    macro_dict, config_dict = macro_parser.parse_file(directory, macro_test)
     template, suffix_dicts, object_dict = (
         object_parser.parse_file(directory, config_dict, obj_test))
     json_data = frame_parser.parse_file(

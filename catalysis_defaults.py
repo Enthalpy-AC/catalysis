@@ -1360,7 +1360,7 @@ charDict = {
             ("tan huh", "huh3"),
             ("tan mad", "m3"),
             ("tan sad", "s3"),
-            ("normal", "n1"),
+            ("normal", "n"),
             ("tan normal", "n3"),
             ("tan side", "side3")
         ])
@@ -4931,7 +4931,7 @@ soundDict = {
     },
     "gallery speaking": {
         "name": "Gallery speaking",
-        "path": "OuverturePorte"
+        "path": "Rumeur"
     },
     "game over": {
         "name": "Game over",
