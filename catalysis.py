@@ -26,7 +26,6 @@ print "Beginning catalysis.\n"
 
 try:
     directory = ""
-    raise AssertionError
     if not test_mode:
         directory, upload_dict = upload_parser.parse_file()
     else:

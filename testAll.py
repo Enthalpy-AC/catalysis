@@ -1170,6 +1170,14 @@ cPos, kumquat""")
         self.checkError((2, "pre char", "character position"), frame="""place, black
 cPos, c""")
         
+    def test_cPos_valid(self):
+        self.checkFile("cPos valid", obj="""Profile {
+sprite:: angelstarr
+prefix:: angelstarr
+}""", frame="""place, black
+as.n
+cPos, l""")
+    
     def test_pPos_no_place(self):
         self.checkError((2, "pre place", "pPos"), frame="""place, black
 pPos, a""")
