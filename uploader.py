@@ -74,7 +74,7 @@ def upload(directory, upload_dict):
 
     upload_data(directory, upload_dict)
     print(
-        "Complete! If you are logged into Firefox on AAO, we will now open"
+        "Complete! If you are logged into Firefox on AAO, we will now open "
         "this in the editor.")
     try:
         open_browser(upload_dict)

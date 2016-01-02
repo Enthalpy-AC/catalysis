@@ -1195,6 +1195,19 @@ prefix:: angelstarr
 as.n
 cPos, l""")
         
+    def test_position_setting(self):
+        self.checkFile("camera speaker", obj="""Profile {
+base: edgeworth
+}
+
+Profile {
+base: phoenix
+}""", frame="""place, aj bench
+pw.n
+cPos, l
+me.n
+cPos, r
+pw.desk""")
     
     def test_pPos_no_place(self):
         self.checkError((2, "pre place", "pPos"), frame="""place, black
