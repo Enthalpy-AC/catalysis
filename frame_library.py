@@ -15,10 +15,11 @@ from library_aux import (
 class Library(object):
     '''Class that does the trial data manipulation.'''
 
-    def __init__(self, JSON, suffix_dicts, object_dict):
+    def __init__(self, JSON, suffix_dicts, object_dict, config_dict):
         self.trial = JSON
         self.suffix_dicts = suffix_dicts
         self.object_dict = object_dict
+        self.base_start = config_dict["startup"]
         self.cross = self.trial["cross_examinations"][-1]
         self.scene = self.trial["scenes"][-1]
         self.statement_index = -1
@@ -277,8 +278,9 @@ class Library(object):
             position = -1 if self.frame["place"] else 0
             self.frame["characters"].append({
                 "profile_id": data["id"], "sprite_id": sprite_id,
-                "sync_mode": 3, "startup_mode": 0, "position": position,
-                "mirror_effect": False, "visual_effect_appears": 1,
+                "sync_mode": 3, "startup_mode": self.base_start,
+                "position": position, "mirror_effect": False,
+                "visual_effect_appears": 1,
                 "visual_effect_appears_mode": 0,
                 "visual_effect_disappears": 1,
                 "visual_effect_disappears_mode": 0

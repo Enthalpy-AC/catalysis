@@ -2701,6 +2701,18 @@ The scent of fresh lemons.... Ah.""")
 ...: 10 
 }""", frame = """null:
 The scent of fresh lemons… Ah.""")
+        
+    def test_bad_startup(self):
+        self.checkError((2, "bad key", "kumquat", "startup macro"), macro="""CONFIG {
+startup: kumquat""")
+
+    def test_startup(self):
+        self.checkFile("startup first", macro="""CONFIG {
+startup: before
+}""", obj="""Profile {
+sprite:: judgebrother
+prefix:: judgebrother
+}""", frame="""jb.yes""")
 
 if __name__ == '__main__':
 

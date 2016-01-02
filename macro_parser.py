@@ -7,7 +7,8 @@ import re
 import sys
 
 from catalysis_globals import (
-    extract_data, int_at_least, Invalid, quote_replace, terminate)
+    extract_data, int_at_least, Invalid, key_or_value, quote_replace,
+    terminate)
 
 from frame_library import reserved_names
 
@@ -27,7 +28,7 @@ class ObjectParser(object):
         self.config_dict = {
             "autopause": True, "autowrap": True, "autoquote": True, ".": "250",
             "!": "250", ",": "125", "-": "200", "?": "250", "...": "500",
-            ";": "200", ":": "200"
+            ";": "200", ":": "200", "startup": 0
         }
 
     def no_macro(self, line):
@@ -74,6 +75,10 @@ class ObjectParser(object):
         # Now we actually set the configuration attribute.
         if attr in {"autopause", "autowrap", "autoquote"}:
             self.config_dict[attr] = not self.config_dict[attr]
+        elif attr == "startup":
+            self.config_dict[attr] = key_or_value(value, {
+                "s": 0, "d": 1, "b": 2, "skip": 0, "during": 1, "before": 2},
+                "startup macro")
         else:
             self.config_dict[attr] = int_at_least(
                 value, 0, "Configuration attribute " + attr)
