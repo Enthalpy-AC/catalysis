@@ -10,6 +10,7 @@ import frame_parser
 import upload_parser
 import os
 import sys
+import traceback
 import uploader
 
 
@@ -24,10 +25,13 @@ except ValueError:
 print "Beginning catalysis.\n"
 
 try:
+    directory = ""
+    raise AssertionError
     if not test_mode:
         directory, upload_dict = upload_parser.parse_file()
     else:
         directory = "test_lib"
+    directory += "/"
     macro_dict, config_dict = macro_parser.parse_file(directory, macro_test)
     template, suffix_dicts, object_dict = (
         object_parser.parse_file(directory, config_dict, obj_test))
@@ -38,7 +42,17 @@ try:
 except SystemExit:
     sys.exit()
 except:
-    print "Unknown error observed! Please send your documents to Enthalpy."
+    print(
+        "Unknown error observed! Please send your documents to Enthalpy, "
+        "especially err.txt, which has been automatically created."
+    )
+    error_file = directory + "err.txt"
+    if getattr(sys, 'frozen', False):
+        error_file = os.path.join(
+            os.path.dirname(sys.executable), error_file)
+    error_file = open(error_file, "w")
+    error_file.write(str(sys.exc_info()[0]) + "\n")
+    traceback.print_tb(sys.exc_info()[2], file=error_file)
     catalysis_globals.terminate()
 
 # Get file even when the program is .exe.
