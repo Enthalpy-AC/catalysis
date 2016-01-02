@@ -1082,9 +1082,9 @@ erase""")
         self.checkFile("erase override", obj="""Profile {
 sprite:: angelstarr
 prefix:: angelstarr
-}""", frame="""place, aj lobby
+}""", frame="""erase
 erase
-erase
+place, aj lobby
 as.n""")
 
     def test_scroll(self):
