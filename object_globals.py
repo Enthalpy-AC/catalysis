@@ -44,9 +44,10 @@ class JSONClass(object):
     def redefine(self, name, value):
         '''Call row function (specified by name), passing the value.'''
         try:
-            self.key_to_method[name](value)
+            func = self.key_to_method[name]
         except KeyError:
             raise Invalid("attr name", name)
+        func(value)
 
     def append(self, value):
         '''Run redefine on the last function, with the old value, a newline,

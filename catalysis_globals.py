@@ -23,6 +23,17 @@ def terminate():
     sys.exit()
 
 
+def encoding_fixer(ambig_string):
+    '''Try to decode the string to utf-8. Failing that, raise an error.'''
+    for encoding in ["utf-8", "utf-16"]:
+        try:
+            return unicode(ambig_string, encoding)
+        except UnicodeDecodeError:
+            pass
+    else:
+        raise Invalid("unk encoding")
+
+
 def quote_replace(match):
     '''Replace smart quotes with ASCII quotes.'''
     return {"‘": "'", "’": "'", "“": '"', "”": '"'}[match.group()]
@@ -36,7 +47,9 @@ def extract_data(file_name):
         input_file = os.path.join(os.path.dirname(sys.executable), input_file)
     try:
         with open(input_file, "rU") as opened_file:
-            return opened_file.read().splitlines()
+            text = opened_file.read()
+            text = encoding_fixer(text)
+            return text.splitlines()
     except IOError:
         print "Ensure {} exists in this folder.".format(file_name)
         terminate()
@@ -216,6 +229,11 @@ err_dict = {
         "argument {}."
     ),
     "unk anc type": "Anchor type {} is not recognized.",
+    "unk encoding": (
+        "Critical error! Encoding type unknown. Please send your EXACT " +
+        "files to Enthalpy as attachments, or through a file-sharing " +
+        "service. Even copy-pasting the files will cause problems."
+    ),
     "unk line": "Line not recognized. Check for typos.",
     "unk obj": "{} is not a recognized object.",
     "unk pre": "{} is not a recognized prefix.",
