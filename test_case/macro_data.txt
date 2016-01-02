@@ -1,0 +1,46 @@
+/* Trial 74165 lets you see what this looks like. */
+to_black {
+music
+place
+}
+
+gallery_murmur {
+place, aj court loud
+sound, gallery
+wait, 3000
+}
+
+gavel {
+place, gavel 1
+sound, gavel
+wait, 1000
+}
+
+mono {
+color, skyblue
+sync, n
+}
+
+key {
+color, orange
+sound, key
+merge
+}
+
+set_court {
+place, aj bench
+set_sprite, me, n
+cPos, left
+set_sprite, wpo, n
+cPos, right
+}
+
+gum_court {
+set_court
+set_sprite, dg, n
+cPos, center
+}
+
+CONFIG {
+startup: before
+}

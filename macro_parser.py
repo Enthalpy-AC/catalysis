@@ -112,8 +112,8 @@ def parse_file(directory, macro_test):
         if parser.config_dict["autoquote"]:
             line = re.sub("‘|’|“|”", quote_replace, line)
         if line.startswith("/*") and parser.next_method != parser.in_comment:
-            parser.return_to = parser.in_macro
-            return parser.in_comment(line)
+            parser.return_to = parser.next_method
+            parser.next_method = parser.in_comment(line)
         elif line.startswith("//"):
             pass
         else:

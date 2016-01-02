@@ -1,0 +1,78 @@
+/* Trial 74165 lets you see what this looks like. */
+Profile {
+hidden: true
+base: edgeworth
+description: Age: 32
+: Gender: Male
+: Myself. I am one of the best prosecutors in the nation, although I am acting as as a defense attorney for my friend, Phoenix Wright.
+}
+
+Profile {
+hidden: true
+base: payneold
+description: Age: 60
+: Gender: Male
+: The "prosecutor" for this case. He is actually a janitor eager to play prosecutor, and the only person I could find on short notice.
+}
+
+Profile {
+hidden: true
+base: gumshoe
+description: Age: 38
+: Gender: Male
+: A homicide detective at the local precinct. Despite this, he is in charge of the robbery investigation. He is inept, yet loyal.
+}
+
+Profile {
+hidden: true
+base: phoenixold
+description: Age: 32
+: Gender: Male
+: My friend and a former defense attorney before his disbarment. I am defending his adoptive daughter, Trucy, on his request.
+}
+
+Profile judge_brother {
+long: Judge Chambers
+hidden: true
+base: judgebrother
+description: Age: ??
+: Gender: Male
+: Judge Arthur Chambers, the brother of the judge who usually presides over my trials. He thinks I am a defense attorney.
+}
+
+Popup no witness {
+name: Court overview no witness
+path: http://i1059.photobucket.com/albums/t432/Enthalpy49/Proxy Specific Images/NotaGhost_zpsea9f7d3c.gif
+}
+
+Sound gallery {
+base: gallery speaking
+}
+
+Sound gavel {
+base: gavel
+}
+
+Sound key {
+base: huh
+}
+
+Sound slap {
+base: slap
+}
+
+Sound sho {
+base: shocked
+}
+
+Sound anger {
+base: anger
+}
+
+Music court {
+base: aai208
+}
+
+Music opening {
+base: aai108
+}

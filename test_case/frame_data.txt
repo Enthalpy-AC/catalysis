@@ -1,0 +1,195 @@
+/* Trial 74165 lets you see what this looks like. */
+to_black
+color, lime:
+June 13, 10:00 AM
+District Courthouse
+Courtroom No. 3
+
+gallery_murmur
+popup, no witness
+
+gavel
+
+place, aj judge
+jb.n
+music, court:
+Court is now in session for the trial of Trucy Wright. Are the defense and prosecution ready?
+
+set_court
+wpo.n:
+The prosecution is ready, Your Honor.
+
+me.Dn:
+The defense is ready, Your Honor.
+
+me.Dann
+mono:
+(Barring the fact that I never finished my talk with the defendant.)
+
+place, aj judge
+jb.n:
+Very good.
+
+jb.n:
+Mr. Edgeworth, is that you?
+
+set_court
+me.Dn:
+Yes, Your Honor.
+
+place, aj judge
+jb.yes:
+It is good to see you again.
+
+jb.n:
+You looked like a promising defense attorney when I presided over one of your cases.
+
+jb:
+I was very disappointed not to have heard anything aboot you atferwards.
+
+jb:
+I am glad to see you are still an attorney.
+
+set_court
+me.Dcon:
+Thank you, Your Honor.
+
+me.Dann
+mono:
+(I remember this judge. He presided over the other case where I posed as a defense attorney.)
+
+me.Dann
+mono
+revEv
+judge_brother:
+(He is the only judge I could find who did not know I am a prosecutor.)
+
+wpo.ner
+sound, anger:
+[#s]What about me?!
+
+place, aj judge
+jb.m:
+Calm down, Mr. Payne. I'm not sure how I feel about prosecutors with such low self-esttem.
+
+set_court
+wpo.n:
+It's not my fault if you forget about me.
+
+me.Dann
+mono:
+(This judge does have a regrettable uncertainty.)
+
+place, aj judge
+jb.n:
+The prosecution may give its opening statement.
+
+set_court
+wpo.n
+music, opening:
+On June the 12th, the defendant went to the Bank of the People dressed in black, with a ski mask.
+
+merge
+wpo:
+She pulled out a 
+
+key:
+gun 
+
+null:
+and demanded a sum of $200,000 or else...
+
+sound, slap
+wpo.con:
+Bam! She would fire. After getting the money, she ran off.
+
+me.Dann
+mono:
+(From that description, this doesn’t look like a case with much in the way of evidence.)
+
+place, aj judge
+jb.n
+sound, key:
+Did the bank have any security staff?
+
+set_court
+wpo.n:
+Yes.
+The guard will testify later.
+
+place, aj judge
+jb.th:
+Hmm...
+
+jb.n
+music:
+The court would like to hear more about what happened.
+
+jb:
+Does the prosecution have a witness prepared to testify on the matter?
+
+set_court
+wpo.n:
+Yes, Your Honor.
+
+place, aj judge
+jb.yes:
+Good. The court would like to hear from this witness.
+
+set_court
+wpo.n:
+The prosecution calls Detective Gumshoe to the stand.
+
+to_black
+wait, 1500
+
+gum_court
+wpo.n
+music, court:
+The witness will state his name and profession.
+
+dg.con:
+Dick Gumshoe. I work homicide at the precinct.
+
+place, aj judge
+jb.sho
+sound, sho:
+A homicide detective testifying about a robbery?!
+
+jb.no:
+I'm not sure how I feel about that.
+
+gum_court
+dg.s
+wait, 1250:
+
+dg.side:
+After my last case, the chief decided that I needed to take a break from homicide for a bit.
+
+dg:
+I was transferred to robbery for two weeks.
+
+me.Dann
+mono:
+(Ah, the inept Detective Gumshoe. I have the misfortune of working with him very frequently.)
+
+me.Dann
+mono:
+(He misses the obvious and is incapable of deduction...)
+
+me.Dann
+mono:
+(...but his dedication and loyalty to me are incredible. That's why he hasn't exposed me.)
+
+place, aj counsel
+pwo.An:
+Knowing Gumshoe, this testmony won't be much of a problem.
+
+me:
+I'm more concerned about making it through this testimony without losing my composure.
+
+gavel
+
+place, aj judge
+jb.n:
+The witness may begin his testimony.
