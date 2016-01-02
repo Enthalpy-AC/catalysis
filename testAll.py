@@ -1077,7 +1077,16 @@ merge""")
     def test_unerase(self):
         self.checkFile("unerase", frame="""erase
 erase""")
-        
+
+    def test_erase_override(self):
+        self.checkFile("erase override", obj="""Profile {
+sprite:: angelstarr
+prefix:: angelstarr
+}""", frame="""place, aj lobby
+erase
+erase
+as.n""")
+
     def test_scroll(self):
         self.checkFile("scroll", frame="scroll")
         
@@ -1177,6 +1186,15 @@ prefix:: angelstarr
 }""", frame="""place, black
 as.n
 cPos, l""")
+        
+    def test_position_override(self):
+        self.checkFile("camera override", obj="""Profile {
+sprite:: angelstarr
+prefix:: angelstarr
+}""", frame="""place, black, center
+as.n
+cPos, l""")
+        
     
     def test_pPos_no_place(self):
         self.checkError((2, "pre place", "pPos"), frame="""place, black

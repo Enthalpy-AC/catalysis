@@ -42,6 +42,8 @@ class Library(object):
             is_object, object_dict=self.object_dict)
         self.from_object_dict.no_manual = True
         self.speaker_override = False
+        self.camera_override = False
+        self.erase_override = False
 
     @no_manual
     def check_ev(self, item):
@@ -69,6 +71,8 @@ class Library(object):
         })
         self.frame = self.trial["frames"][-1]
         self.speaker_override = False
+        self.camera_override = False
+        self.erase_override = False
 
     @delay_sub
     def dialogue(self, *args):
@@ -103,8 +107,14 @@ class Library(object):
         obj = self.from_object_dict(name, {"sounds"}, "Sound to play")
         self.frame["sound"] = obj.data["id"]
 
-    def place(self, name="black", position="center"):
+    def place(self, name="black", position=False):
         '''Set the place.'''
+        # If a position is given, disable characters implicitly changing it.
+        if position:
+            self.camera_override = True
+        # Otherwise, mark the new position as center.
+        else:
+            position = "center"
         self.frame["place"] = self.place_exp(["val", name], kill_exp=True)[1]
         if self.frame["characters"]:
             raise Invalid("place post char")
@@ -117,6 +127,8 @@ class Library(object):
         }
         self.frame["place_position"] = key_or_value(
             position, pos_dict, "position")
+        if not self.erase_override:
+            self.frame["characters_erase_previous"] = True
 
     def wait(self, time):
         '''Set a wait in milliseconds. Argument is wait in miliseconds.'''
@@ -134,6 +146,7 @@ class Library(object):
         '''Erases previous characters.'''
         self.frame["characters_erase_previous"] = not self.frame[
             "characters_erase_previous"]
+        self.erase_override = True
 
     def scroll(self):
         '''Established smooth scrolling.'''
@@ -215,6 +228,8 @@ class Library(object):
             self.frame["characters"][-1]["position"] = pos_number
         except IndexError:
             raise Invalid("pre char", "character position")
+        if not self.camera_override:
+            self.frame["place_position"] = pos_number
 
     def p_pos(self, keyword):
         '''Set the place position. Automatic, no move, or align on

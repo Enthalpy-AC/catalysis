@@ -62,30 +62,34 @@ class ObjectParser(object):
                 else:
                     self.active_object.redefine("name", name)
             return self.in_object
-        # Assume subobject, so names have to be flipped
-        # around, and the second word is mandatory.
+
+        # Parse line as "parent_name sub_type {" else crash.
         try:
-            name, subobject = object_type, name.lower()
+            parent_name, sub_type = re.match(
+                r"(.+?)\s+(\w+)\s*\{$", line).groups()
         except AttributeError:
             if object_type in self.subobject_dict:
                 raise Invalid("no parent obj")
             else:
                 raise Invalid("unk line")
+
+        sub_type = sub_type.lower()
+            
         # Find the object it's a subobject of.
         try:
-            base_object = self.using_objects[name]
+            base_object = self.using_objects[parent_name]
         except KeyError:
-            raise Invalid("parent obj dne", name)
+            raise Invalid("parent obj dne", parent_name)
         # Find the kind of subobject it's supposed to be.
         try:
-            subobject_class = self.subobject_dict[subobject]
+            subobject_class = self.subobject_dict[sub_type]
         except KeyError:
-            raise Invalid("subobj dne", subobject)
+            raise Invalid("subobj dne", sub_type)
         # Validate the current object permits this subobject.
         if subobject_class in base_object.sub_set:
             self.active_object = subobject_class(base_object)
         else:
-            raise Invalid("obj subobj forbid", subobject, name)
+            raise Invalid("obj subobj forbid", sub_type, parent_name)
         return self.in_object
 
     def in_object(self, line):
