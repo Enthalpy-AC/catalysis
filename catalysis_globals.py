@@ -7,12 +7,11 @@ import sys
 
 class Invalid(Exception):
     '''Exception that triggers upon invalid data.'''
-    def __init__(self, message, *args):
-        super(Invalid, self).__init__(message)
-        err_code = err_dict[message].format(*args)
+    def __init__(self, err_code, *args):
+        err_msg = err_dict[err_code].format(*args)
         # Escape all braces in the error code, so format doesn't break.
-        err_code = err_code.replace("{", "{{").replace("}", "}}")
-        self.message = "Error on {} of {}: " + err_code
+        err_msg = err_msg.replace("{", "{{").replace("}", "}}")
+        self.message = "Error on {} of {}: " + err_msg
 
 
 def terminate():
@@ -25,13 +24,13 @@ def terminate():
 
 def encoding_fixer(ambig_string):
     '''Try to decode the string to utf-8. Failing that, raise an error.'''
-    for encoding in ["utf-8", "utf-16"]:
+    for encoding in ["utf-8", "utf-16", "latin-1"]:
         try:
             return unicode(ambig_string, encoding)
         except UnicodeDecodeError:
             pass
     else:
-        raise Invalid("unk encoding")
+        raise Invalid("dummy")
 
 
 def quote_replace(match):
@@ -50,9 +49,13 @@ def extract_data(file_name):
             text = opened_file.read()
             text = encoding_fixer(text)
             return text.splitlines()
+    except Invalid:
+    	print("Encoding for {} unknown. Please send your EXACT files to " +
+        "Enthalpy as attachments, or through a file-sharing service. Even " +
+        "copy-pasting the files will cause problems.").format(file_name)
     except IOError:
-        print "Ensure {} exists in this folder.".format(file_name)
-        terminate()
+        print("Ensure {} exists in this folder.".format(file_name))
+    terminate()
 
 
 def list_to_n_tuple(target_list, mod, msg=""):
@@ -230,11 +233,6 @@ err_dict = {
         "argument {}."
     ),
     "unk anc type": "Anchor type {} is not recognized.",
-    "unk encoding": (
-        "Critical error! Encoding type unknown. Please send your EXACT " +
-        "files to Enthalpy as attachments, or through a file-sharing " +
-        "service. Even copy-pasting the files will cause problems."
-    ),
     "unk line": "Line not recognized. Check for typos.",
     "unk obj": "{} is not a recognized object.",
     "unk pre": "{} is not a recognized prefix.",
