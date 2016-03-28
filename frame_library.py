@@ -1280,7 +1280,7 @@ class Library(object):
         return place
 
     @no_manual
-    def bg_fg_obj_exp(self, bg_fg_obj, place, built_dict, got_id = False):
+    def bg_fg_obj_exp(self, bg_fg_obj, place, built_dict, got_id=False):
         '''Convert a tuple representing a background or foreground object from
         user-input to editor form.'''
         if not got_id:
@@ -1391,7 +1391,7 @@ class Library(object):
             pieces = shape + ":" + ",".join(pieces)
         else:
             pieces = ",".join(pieces)
- 
+
         return [parse_instr, pieces]
 
     @no_manual
@@ -1499,7 +1499,7 @@ class Library(object):
                 exam, [prefix, int(place_id)], {}, True)
             exam = {"place_id": self.frame["action_parameters"]["global"][
                 "background"], "layer": param(exam, 1),
-                "id": param(exam, 2)}
+                    "id": param(exam, 2)}
         else:
             raise Invalid("bad exam type", exam_type, "region, object")
         self.frame_exp(("multiple", "area", len(insert), "area_dest"))

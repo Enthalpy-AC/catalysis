@@ -41,8 +41,6 @@ class ObjectParser(object):
             raise Invalid("unk line")
         if macro.lower() == "config":
             return self.config
-        if macro.lower() == "automate":
-            return self.automate
         if macro in self.macro_dict:
             raise Invalid("ban duplicate", "Macro", macro)
         # You can't give a macro the same name as a frame action.
@@ -78,7 +76,7 @@ class ObjectParser(object):
         elif attr == "startup":
             self.config_dict[attr] = key_or_value(value, {
                 "s": 0, "d": 1, "b": 2, "skip": 0, "during": 1, "before": 2},
-                "startup macro")
+                                                  "startup macro")
         else:
             self.config_dict[attr] = int_at_least(
                 value, 0, "Configuration attribute " + attr)

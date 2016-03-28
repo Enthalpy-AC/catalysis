@@ -74,7 +74,7 @@ class ObjectParser(object):
                 raise Invalid("unk line")
 
         sub_type = sub_type.lower()
-            
+
         # Find the object it's a subobject of.
         try:
             base_object = self.using_objects[parent_name]

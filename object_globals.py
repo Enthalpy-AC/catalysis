@@ -108,7 +108,7 @@ class JSONRow(JSONClass):
         base.update(default)
         self.__class__.chain = self.__class__.chain + [base]
         return self.__class__.chain[-1]
-    
+
     @abstractproperty
     def base_dict(self):
         '''Dictionary of default values. All rows should override this.'''

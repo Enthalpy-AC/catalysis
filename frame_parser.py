@@ -25,8 +25,8 @@ class FrameParser(object):
         self.root = tk.Tk()
         self.font = tkFont.Font(family="PW Extended", size=-12)
         self.next_method = self.init_frame
-        self.executor = frame_library.Library(template, suffix_dicts, obj_dict,
-            config_dict)
+        self.executor = frame_library.Library(
+        	   template, suffix_dicts, obj_dict, config_dict)
         self.glyph_dict = {}
         self.escape_dict = {}
         self.line_queue = [""]

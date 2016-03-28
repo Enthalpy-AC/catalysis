@@ -24,7 +24,7 @@ def parse_file():
                 raise Invalid("selector", string)
     except Invalid:
         print sys.exc_info()[1].message.format(
-                "line {}".format(2*i+1), file_name)
+            "line {}".format(2*i+1), file_name)
         terminate()
     return lines[5], {
         "username": lines[1], "password": lines[3],
