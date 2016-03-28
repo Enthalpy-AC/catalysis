@@ -2,12 +2,14 @@
 
 '''Generic functions used by several modules. Primarily data validation.'''
 
+import codecs
 import os
 import sys
 
 class Invalid(Exception):
     '''Exception that triggers upon invalid data.'''
     def __init__(self, err_code, *args):
+        super(Invalid, self).__init__(err_code)
         err_msg = err_dict[err_code].format(*args)
         # Escape all braces in the error code, so format doesn't break.
         err_msg = err_msg.replace("{", "{{").replace("}", "}}")
@@ -22,17 +24,6 @@ def terminate():
     sys.exit()
 
 
-def encoding_fixer(ambig_string):
-    '''Try to decode the string to utf-8. Failing that, raise an error.'''
-    for encoding in ["utf-8", "utf-16", "latin-1"]:
-        try:
-            return unicode(ambig_string, encoding)
-        except UnicodeDecodeError:
-            pass
-    else:
-        raise Invalid("dummy")
-
-
 def quote_replace(match):
     '''Replace smart quotes with ASCII quotes.'''
     return {"‘": "'", "’": "'", "“": '"', "”": '"'}[match.group()]
@@ -45,16 +36,16 @@ def extract_data(file_name):
     if getattr(sys, 'frozen', False):
         input_file = os.path.join(os.path.dirname(sys.executable), input_file)
     try:
-        with open(input_file, "rU") as opened_file:
+        with codecs.open(input_file, "rU", "utf-8") as opened_file:
             text = opened_file.read()
-            text = encoding_fixer(text)
+            if text.startswith(codecs.BOM_UTF8.decode('utf8')):
+                text = text[1:]
             return text.splitlines()
-    except Invalid:
-    	print("Encoding for {} unknown. Please send your EXACT files to " +
-        "Enthalpy as attachments, or through a file-sharing service. Even " +
-        "copy-pasting the files will cause problems.").format(file_name)
+    except UnicodeDecodeError:
+        print("Encoding for {} unknown. Please convert your files to UTF-8 " +
+              "encoding before continuing.").format(file_name)
     except IOError:
-        print("Ensure {} exists in this folder.".format(file_name))
+        print "Ensure {} exists in this folder.".format(file_name)
     terminate()
 
 
