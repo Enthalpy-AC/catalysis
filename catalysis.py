@@ -8,7 +8,6 @@ import object_parser
 import macro_parser
 import frame_parser
 import upload_parser
-import os
 import sys
 import traceback
 import uploader
@@ -45,21 +44,14 @@ except:
         "Unknown error observed! Please send your documents to Enthalpy, "
         "especially err.txt, which has been automatically created."
     )
-    error_file = directory + "err.txt"
-    if getattr(sys, 'frozen', False):
-        error_file = os.path.join(
-            os.path.dirname(sys.executable), error_file)
+    error_file = catalysis_globals.get_file_name(directory + "/err.txt")
     error_file = open(error_file, "w")
     error_file.write(str(sys.exc_info()[0]) + "\n")
     traceback.print_tb(sys.exc_info()[2], file=error_file)
     catalysis_globals.terminate()
 
-# Get file even when the program is .exe.
-output_file = directory + "/testData.txt"
-if getattr(sys, 'frozen', False):
-    output_file = os.path.join(os.path.dirname(sys.executable), output_file)
-
-# Write the full information to the file.
+# Write data to file.
+output_file = catalysis_globals.get_file_name(directory + "/testData.txt")
 open(output_file, "w").write('//Definition//Def6\n' + json_data)
 
 if not test_mode:

@@ -24,6 +24,16 @@ def terminate():
     sys.exit()
 
 
+def get_file_name(file_name):
+    '''Return the name of the file, making corrections for the
+	Py2Exe handling of file locations.'''
+    if getattr(sys, 'frozen', False):
+        directory = os.path.dirname(unicode(
+            sys.executable, sys.getfilesystemencoding()))
+        return os.path.join(directory, file_name)
+    return file_name
+
+
 def quote_replace(match):
     '''Replace smart quotes with ASCII quotes.'''
     return {"‘": "'", "’": "'", "“": '"', "”": '"'}[match.group()]
@@ -31,10 +41,7 @@ def quote_replace(match):
 
 def extract_data(file_name):
     '''Return the lines of the target file.'''
-    input_file = file_name
-    # This "hack" lets the code be run either from command line or py2exe.
-    if getattr(sys, 'frozen', False):
-        input_file = os.path.join(os.path.dirname(sys.executable), input_file)
+    input_file = get_file_name(file_name)
     try:
         with codecs.open(input_file, "rU", "utf-8") as opened_file:
             text = opened_file.read()
