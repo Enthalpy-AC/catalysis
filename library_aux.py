@@ -14,18 +14,30 @@ def expression_pack(arguments, schema, pad=False, back=""):
     prefix may have multiple. The schemas give the number of data points for
     each xpr-prefixed subunit in a unit. arguments is a list/tuple of
     arguments to the action.'''
-    def repl_custom(match):
-        '''Replace when Catalysis variables are allowed.'''
+    
+    def replacer(arg):
+		# Handle $, \, and Catalysis variables.
+		try:
+			tag = re.sub(
+				r"\\(\\|\$|\{|\}|:)|\{|\}|\$|:", repl, arg)
+		except Invalid:
+			raise Invalid("unescaped brace", arg)
+		if tag.count("\n") % 2:
+			raise Invalid("$ syntax", arg)
+		# Now, check whether the : pattern is right.
+		if not re.search(
+				r"^[^\r\n]*(\n[^\r\n]*\r?[^\r\n]*\n[^\r\n]*)*$",
+				tag):
+			raise Invalid(": syntax", arg)
+		return tag
+    
+    def repl(match):
+        '''Handle all replacements necessary for expression mode and Catalysis
+        variables.'''
         if match.group(0) in {"{", "}"}:
             raise Invalid("dummy")
         return {r"\\": "\\", r"\$": "$", "$": "\n", r"\}": "}",
                 r"\{": "}", r"\:": ":", ":": "\r"}[match.group()]
-
-    def repl_default(match):
-        '''Replace when Catalysis variables are not allowed.'''
-        if match.group(0) in {"{", "}"}:
-            raise Invalid("dummy")
-        return {r"\\": "\\", r"\}": "}", r"\{": "{"}[match.group()]
 
     arguments = list(arguments)
     unit = []
@@ -44,11 +56,11 @@ def expression_pack(arguments, schema, pad=False, back=""):
             arg = "" if pad and not arguments else arguments.pop(0)
             # If the arguments are in expression mode...
             if arg.startswith("{"):
-                # Make a list of all the arguments for this "phase," removing
-                # the { from the first argument.
+                # List all the arguments for this unit removing  { from the
+                # first argument.
                 active_args = [arg[1:]] + arguments[:subunit_len-1]
-                # Slicing doesn't raise errors, so we need to validate
-                # that all these arguments exist.
+                # Slicing doesn't raise errors, so validate all these
+                # arguments exist.
                 if len(active_args) != subunit_len:
                     raise Invalid(
                         "bad exp number", i, len(active_args), subunit_len)
@@ -59,32 +71,15 @@ def expression_pack(arguments, schema, pad=False, back=""):
                 else:
                     raise Invalid("no close brace", active_args[-1])
                 for arg in active_args:
-                    # Handle $, \, and Catalysis variables.
-                    try:
-                        tag = re.sub(
-                            r"\\(\\|\$|\{|\}|:)|\{|\}|\$|:", repl_custom, arg)
-                    except Invalid:
-                        raise Invalid("unescaped brace", arg)
-                    if tag.count("\n") % 2:
-                        raise Invalid("$ syntax", arg)
-                    # Now, check whether the : pattern is right.
-                    if not re.search(
-                            r"^[^\r\n]*(\n[^\r\n]*\r?[^\r\n]*\n[^\r\n]*)*$",
-                            tag):
-                        raise Invalid(": syntax", arg)
-                    subbed_args.append(tag)
+                    subbed_args.append(replacer(arg))
                 # Prefix the argument list and add the subunit.
                 unit.append(["xpr"] + subbed_args)
                 del arguments[:subunit_len-1]
             # If the arguments are not in expression mode...
             else:
-                # Handle $, {, } and \ escapes, and append a subdescriptor.
+                # Handle escapes, and append a subdescriptor.
                 # The function will modify this if necessary.
-                try:
-                    arg = re.sub(r"\\(\\|\{|\})|\{|\}", repl_default, arg)
-                except Invalid:
-                    raise Invalid("unescaped brace", arg)
-                unit.append(["val", arg])
+                unit.append(["val", replacer(arg)])
         except IndexError:
             raise Invalid("schema fail", i, back)
     if arguments:

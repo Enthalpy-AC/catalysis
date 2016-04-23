@@ -1923,13 +1923,22 @@ anc, my_over""")
     def test_anc_unset(self):
         self.checkError(("end of file", "anc unset", "evidence", "anchor"), frame="""varDef
 {$evidence: anchor$}, 2""")
-        
-    def test_colon_var(self):
-        self.checkFile("colon var", frame="""varDef
+
+    def test_colon_var_break(self):
+        self.checkError((2, ": syntax", "12:34"), frame="""varDef
 12:34, 5""")
 
-    def test_colon_xpr(self):
-        self.checkFile("colon exp", obj="""Evidence Badge {
+    def test_colon_var(self):
+        self.checkFile("colon var", frame="""varDef
+12\:34, 5""")
+
+    def test_cat_var_var(self):
+        self.checkFile("catalysis var var", obj="""Evidence Badge {
+}""", frame="""varDef
+is_badge_revealed, evidence_is_revealed('preuve'\, $evidence: Badge$)""")
+
+    def test_cat_var_exp(self):
+        self.checkFile("catalysis var exp", obj="""Evidence Badge {
 }""", frame="""varDef
 is_badge_revealed, {evidence_is_revealed('preuve'\, $evidence: Badge$)}""")
 
