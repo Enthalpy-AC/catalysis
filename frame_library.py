@@ -340,7 +340,7 @@ class Library(object):
     @special
     def assist(self):
         '''Start an assistant conversation.'''
-        self.statement_index = 0
+        self.statement_index = -1
         self.location = "assist"
         self.frame["wait_time"] = 1
         self.cross["cocouncil_start"] = self.frame["id"]

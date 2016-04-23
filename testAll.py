@@ -1465,6 +1465,36 @@ assist
 ceEnd
 anc, explain""")
 
+    def test_double_cross(self):
+        self.checkFile("double cross", obj="""ceStart
+ceStatement:
+Hi
+
+assist:
+
+press:
+
+fail:
+
+ceEnd:
+nun...
+
+null:
+And again
+
+ceStart
+ceStatement:
+Hi
+
+assist:
+
+press:
+
+fail:
+
+ceEnd:
+Error?""")
+
 class Investigation_Tests(FrameErrors):
 
     folder = "scene"
