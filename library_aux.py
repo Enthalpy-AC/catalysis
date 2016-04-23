@@ -90,7 +90,7 @@ def expression_pack(arguments, schema, pad=False, back=""):
 def param(tup, i):
     '''Used to parse an expression_pack unit, which are in the format:
     [prefix, arg1, arg2, etc.]'''
-    return tup[0] + "=" + str(tup[i])
+    return tup[0] + "=" + unicode(tup[i])
 
 
 def no_manual(func):

@@ -15,7 +15,8 @@ import uploader
 
 # If there are three argument variables, we're in test mode. Accept the data.
 try:
-    __, macro_test, obj_test, frame_test = sys.argv
+    arguments = [arg.decode("utf-8") for arg in sys.argv]
+    __, macro_test, obj_test, frame_test = arguments
     test_mode = True
 except ValueError:
     macro_test, obj_test, frame_test = False, False, False

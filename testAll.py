@@ -1908,6 +1908,12 @@ kumquat}""")
 
 anc, my_over""")
 
+    # Uses the same file as above.
+    def test_pack_unicode(self):
+        self.checkFile("anchor expression", frame=u"""setOver, {$my_över$}
+
+anc, my_över""")
+
     def test_exterior_colon(self):
         self.checkError((2, ": syntax", "kumquat:"), frame="""varDef
 {kumquat:}, 2""")
