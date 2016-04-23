@@ -32,7 +32,7 @@ class FrameParser(object):
         self.line_queue = [""]
         self.macro_dict = macro_dict
         self.config_dict = config_dict
-        for punctuation in {".", "!", ",", "-", "?", "…", ";", ":"}:
+        for punctuation in {".", "!", ",", "-", "?", u"…", ";", ":"}:
             # 0's vanish.
             if self.config_dict[punctuation]:
                 self.escape_dict[punctuation] = "[#{}]".format(
@@ -367,7 +367,7 @@ class FrameParser(object):
                 # Ellipsis case.
                 if match.group(2) == len(match.group(2)) * "." and len(
                         match.group(2)) > 1:
-                    return match.group(2) + self.escape_dict.get("…", "")
+                    return match.group(2) + self.escape_dict.get(u"…", "")
                 else:
                     return match.group(2)
 
@@ -397,7 +397,7 @@ class FrameParser(object):
                 # ...means the first word in our loop is the last word
                 # and hence needs no pauses. found_last handles this.
                 if found_last:
-                    tag = re.sub(r'(\\)?(\.+|\\|,|-|\?|!|…|;|:)',
+                    tag = re.sub(r'(\\)?(\.+|\\|,|-|\?|!|' + u"…" + '|;|:)',
                                  escape, tag)
                 # The last word /could/ be null, if, say, it ends with a close
                 # tag. If so, don't mark it as the last tag. It's the word in

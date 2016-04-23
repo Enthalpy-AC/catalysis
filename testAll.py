@@ -2607,7 +2607,6 @@ region, {3}, {4}""")
         self.checkError((2, "bad arg num", "examination region selector"), frame="""point, {1}, {2}
 region, {3}""")
         
-
     def test_point_scene(self):
         self.checkFile("point scene", obj="""Place New_Place {
 }""", frame="""sceIntro

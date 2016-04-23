@@ -127,5 +127,5 @@ def parse_file(directory, macro_test):
     except Invalid:
         print sys.exc_info()[1].message.format("end of file", file_name)
         terminate()
-    parser.config_dict["…"] = parser.config_dict.pop("...")
+    parser.config_dict[u"…"] = parser.config_dict.pop("...")
     return parser.macro_dict, parser.config_dict
