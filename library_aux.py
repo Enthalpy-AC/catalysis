@@ -14,30 +14,27 @@ def expression_pack(arguments, schema, pad=False, back=""):
     prefix may have multiple. The schemas give the number of data points for
     each xpr-prefixed subunit in a unit. arguments is a list/tuple of
     arguments to the action.'''
-    
+
     def replacer(arg):
-		# Handle $, \, and Catalysis variables.
-		try:
-			tag = re.sub(
-				r"\\(\\|\$|\{|\}|:)|\{|\}|\$|:", repl, arg)
-		except Invalid:
-			raise Invalid("unescaped brace", arg)
-		if tag.count("\n") % 2:
-			raise Invalid("$ syntax", arg)
-		# Now, check whether the : pattern is right.
-		if not re.search(
-				r"^[^\r\n]*(\n[^\r\n]*\r?[^\r\n]*\n[^\r\n]*)*$",
-				tag):
-			raise Invalid(": syntax", arg)
-		return tag
-    
-    def repl(match):
-        '''Handle all replacements necessary for expression mode and Catalysis
-        variables.'''
-        if match.group(0) in {"{", "}"}:
-            raise Invalid("dummy")
-        return {r"\\": "\\", r"\$": "$", "$": "\n", r"\}": "}",
-                r"\{": "}", r"\:": ":", ":": "\r"}[match.group()]
+        '''Handle $, \, and Catalysis variables.'''
+
+        def repl(match):
+            '''Handle all replacements necessary for expression mode and
+            Catalysis variables.'''
+            if match.group(0) in {"{", "}"}:
+                raise Invalid("unescaped brace", arg)
+            return {r"\\": "\\", r"\$": "$", "$": "\n", r"\}": "}",
+                    r"\{": "}", r"\:": ":", ":": "\r"}[match.group()]
+
+        tag = re.sub(r"\\(\\|\$|\{|\}|:)|\{|\}|\$|:", repl, arg)
+        if tag.count("\n") % 2:
+            raise Invalid("$ syntax", arg)
+        # Now, check whether the : pattern is right.
+        if not re.search(
+                r"^[^\r\n]*(\n[^\r\n]*\r?[^\r\n]*\n[^\r\n]*)*$",
+                tag):
+            raise Invalid(": syntax", arg)
+        return tag
 
     arguments = list(arguments)
     unit = []
