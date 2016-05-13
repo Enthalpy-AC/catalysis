@@ -19,7 +19,9 @@ class Invalid(Exception):
 def terminate():
     '''Close the program, waiting for user input if run from executable.'''
     if getattr(sys, 'frozen', False):
-        raw_input("Press any key to continue.")
+        print("Press any key to continue.")
+        # Input can't have an argument, due to the codec.
+        input()
     # This must have its default value of 0 for autotesting to work.
     sys.exit()
 
@@ -28,8 +30,7 @@ def get_file_name(file_name):
     '''Return the name of the file, making corrections for the
 	Py2Exe handling of file locations.'''
     if getattr(sys, 'frozen', False):
-        directory = os.path.dirname(unicode(
-            sys.executable, sys.getfilesystemencoding()))
+        directory = os.path.dirname(sys.executable)
         return os.path.join(directory, file_name)
     return file_name
 
@@ -43,22 +44,21 @@ def extract_data(file_name):
     '''Return the lines of the target file.'''
     input_file = get_file_name(file_name)
     try:
-        with codecs.open(input_file, "rU", "utf-8") as opened_file:
+        with open(input_file, "r", encoding="utf-8") as opened_file:
             text = opened_file.read()
             if text.startswith(codecs.BOM_UTF8.decode('utf8')):
                 text = text[1:]
             return text.splitlines()
     except UnicodeDecodeError:
-        print("Encoding for {} unknown. Please convert your files to UTF-8 " +
-              "encoding before continuing.").format(file_name)
+        print(("Encoding for {} unknown. Please convert your files to UTF-8 " +
+               "encoding before continuing.").format(file_name))
     except IOError:
-        print "Ensure {} exists in this folder.".format(file_name)
+        print("Ensure {} exists in this folder.".format(file_name))
     terminate()
 
 
-def list_to_n_tuple(target_list, mod, msg=""):
-    '''Convert a flat list to a list of n-length tuples. Sample use:
-    convert a list of x and y into x,y tuples. Raise an error if
+def list_to_n_gen(target_list, mod, msg=""):
+    '''Convert a flat list to a generator of n-length tuples. Raise an error if
     there aren't enough elements to convert fully.'''
     remainder = len(target_list) % mod
     if remainder:
@@ -74,7 +74,7 @@ def key_or_value(value, dictionary, word, or_value=False):
     try:
         return dictionary[value]
     except KeyError:
-        if or_value and value in dictionary.itervalues():
+        if or_value and value in dictionary.values():
             return value
         else:
             raise Invalid("bad key", value, word)

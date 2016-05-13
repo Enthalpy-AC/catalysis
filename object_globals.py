@@ -1,3 +1,5 @@
+# coding: UTF-8
+
 '''Module with abstract classes for object and subobjects for frame_parser.'''
 
 from abc import ABCMeta, abstractproperty
@@ -5,7 +7,7 @@ from abc import ABCMeta, abstractproperty
 from catalysis_globals import Invalid
 
 
-class JSONClass(object):
+class JSONClass(object, metaclass=ABCMeta):
     '''An abstract JSON class, filled with the generic methods used to select
     proper function to run.
 
@@ -16,8 +18,6 @@ class JSONClass(object):
     current value of the last method otherwise. Used for line continuation.
     base_exclude : A set of attributes to be excluded from base's
     redefining.'''
-
-    __metaclass__ = ABCMeta
 
     colon_dict = {}
     last_method = False
@@ -85,7 +85,7 @@ class JSONClass(object):
             raise Invalid("attr name", name)
 
 
-class JSONRow(JSONClass):
+class JSONRow(JSONClass, metaclass=ABCMeta):
     '''A JSON object representing a second-level JSON object in v6 trial_data.
 
     chain: A list of JSON_Row objects of the same type.
@@ -93,8 +93,6 @@ class JSONRow(JSONClass):
 
     An instance will also have:
     base_dict: A dictionary from which to draw default values.'''
-
-    __metaclass__ = ABCMeta
 
     chain = [0]
     sub_set = set()

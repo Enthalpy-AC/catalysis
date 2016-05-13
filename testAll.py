@@ -1,9 +1,11 @@
 # coding: UTF-8
 
-import os
-import unittest
+import itertools
 import json
+import os
+import re
 import subprocess
+import unittest
 
 from catalysis_globals import err_dict
 
@@ -14,26 +16,35 @@ class TestCase(unittest.TestCase):
     folder = ""
         
     def catalyze(self, macro, obj, frame):
-        return subprocess.check_output(["python", "catalysis.py", macro, obj, frame]).splitlines()[-1]
-        
+    	# Change "python3" to whatever your console uses for python 3.
+        return subprocess.check_output(["python3", "catalysis.py", macro, obj, frame]).decode('utf8').splitlines()[-1]
+
     def returnFile(self, filename="test_lib/testData.txt"):
-        with open(filename) as g:
+        with open(filename, "r", encoding="utf-8") as g:
             header, data = g.read().splitlines()
             assert header == r"//Definition//Def6"
             return json.loads(data)
 
-    def checkError(self, msg, macro="", obj="", frame =""):
+    def set_to_string_set(self, entry_set):
+	    return {", ".join(j) for j in itertools.permutations(entry_set)}
+
+    def checkError(self, msg_params, macro="", obj="", frame =""):
         '''Run the program, and assert that it raised the expected error.
         Error is encoded as (line number or "end of file", error key from
         catalysis_globals, any necessary arguments)'''
-        location = "line {}".format(msg[0]) if isinstance(msg[0], int) else msg[0]
-        msg = err_dict[msg[1]].format(*msg[2:])
-        self.assertEqual(self.catalyze(macro, obj, frame), "Error on {} of {}: {}".format(location, self.filename, msg))
+        location, err_type, *msg_params = msg_params
+        location = "line {}".format(location) if isinstance(location, int) else location
+        message = err_dict[err_type]
+        msg_params = (self.set_to_string_set(i) if isinstance(i, set) else {i} for i in msg_params)
+        msg_params = itertools.product(*msg_params)
+        target_strings = {"Error on {} of {}: {}".format(location, self.filename, message.format(*i)) for i in msg_params}
+        catalyzed_string = self.catalyze(macro, obj, frame)
+        self.assertIn(catalyzed_string, target_strings)
 
     def checkFile(self, filename, macro="", obj="", frame=""):
         '''Run the program, assert that it worked, and compare the result file
         with the file with name filename in the target folder.'''
-        self.assertEqual(self.catalyze(macro, obj, frame), "Catalysis complete!")
+        self.assertEqual(self.catalyze(macro, obj, frame), "Catalysis complete! Ignore any messages about failed script execution.")
         self.assertDictEqual(self.returnFile("test_lib/{}/{}.txt".format(self.folder, filename)), self.returnFile())
 
 class ObjectErrors(TestCase):
@@ -902,21 +913,6 @@ may.n:""")
     def test_terminal_colon_escape(self):
         self.checkFile("colon escape", frame="speakerName, myTest\:")
 
-    def test_bad_arg_num(self):
-        self.checkError((1, "bad arg num", "merge"), frame="merge, upupu")
-
-    def test_end_merge(self):
-        self.checkError(("end of file", "terminal merge"), frame="merge")
-
-    def test_unk_line_args(self):
-        self.checkError((1, "unk line"), frame="fake, command")
-        
-    def test_unk_line_words(self):
-        self.checkError((1, "unk line"), frame="fake command")
-        
-    def test_unk_line_word(self):
-        self.checkError((1, "unk line"), frame="fakecommand")
-
 class Word_Wrap(FrameErrors):
 
     folder = "word wrap"
@@ -976,6 +972,24 @@ I see....""")
 class Frame_Commands(FrameErrors):
     
     folder = "frame"
+    
+    def test_bad_arg_num(self):
+        self.checkError((1, "bad arg num", "merge"), frame="merge, upupu")
+
+    def test_end_merge(self):
+        self.checkError(("end of file", "terminal merge"), frame="merge")
+
+    def test_unk_line_args(self):
+        self.checkError((1, "unk line"), frame="fake, command")
+        
+    def test_unk_line_words(self):
+        self.checkError((1, "unk line"), frame="fake command")
+        
+    def test_unk_line_word(self):
+        self.checkError((1, "unk line"), frame="fakecommand")
+        
+    def test_unicode_line_word(self):
+        self.checkError(("end of file", "anc unset", "frame", "á"), frame="proceed, á")
     
     def test_popup(self):
         self.checkFile("popup", obj="""Popup Foo {
@@ -1398,10 +1412,10 @@ ceEnd""")
         self.checkError((1, "ban manual", "assistEnd"), frame="assistEnd")
         
     def test_cross_command_error(self):
-        self.checkError((1, "bad context", "outside of special blocks", "a generally usable command or ", "ceStart, sceIntro"), frame="assist")
+        self.checkError((1, "bad context", "outside of special blocks", "a generally usable command or ", {"ceStart", "sceIntro"}), frame="assist")
         
     def test_cross_context_error(self):
-        self.checkError((2, "bad context", "after ceStart", "", "ceStatement, assist"), frame="""ceStart
+        self.checkError((2, "bad context", "after ceStart", "", {"ceStatement", "assist"}), frame="""ceStart
 press""")
         
     def test_end_error(self):
@@ -1431,7 +1445,7 @@ assist
 ceEnd""")
 
     def test_contra_err(self):
-        self.checkError((3, "type in set", "Contradictory item", "profiles, evidence"), obj="""Popup obj {
+        self.checkError((3, "type in set", "Contradictory item", {"evidence", "profiles"}), obj="""Popup obj {
 }""", frame="""ceStart
 ceStatement
 contra, obj, objectionable""")
@@ -1466,7 +1480,7 @@ ceEnd
 anc, explain""")
 
     def test_double_cross(self):
-        self.checkFile("double cross", obj="""ceStart
+        self.checkFile("double cross", frame="""ceStart
 ceStatement:
 Hi
 
@@ -1786,7 +1800,7 @@ scePresConvo, kumquat
 scePresConvo, kumquat""")
         
     def test_not_presentable(self):
-        self.checkError((6, "type in set", "Item to present", "profiles, evidence"), obj="""Place kumquat {
+        self.checkError((6, "type in set", "Item to present", {"profiles", "evidence"}), obj="""Place kumquat {
 }""", frame="""sceIntro
 sceMain
 
@@ -1940,7 +1954,7 @@ anc, my_over""")
 
     # Uses the same file as above.
     def test_pack_unicode(self):
-        self.checkFile("anchor expression", frame=u"""setOver, {$my_över$}
+        self.checkFile("anchor expression", frame="""setOver, {$my_över$}
 
 anc, my_över""")
 
@@ -2001,7 +2015,7 @@ my_ev, tr
 my_ev, bottomleft""")
         
     def test_dispEv_bad_item(self):
-        self.checkError((2, "type in set", "Item to display", "profiles, evidence"), obj="""Place my_ev{
+        self.checkError((2, "type in set", "Item to display", {"profiles", "evidence"}), obj="""Place my_ev{
 }""", frame="""dispEv
 my_ev, tr""")
         
@@ -2031,7 +2045,7 @@ my_ev, tr""")
 my_ev""")
         
     def test_hideEv_bad_item(self):
-        self.checkError((2, "type in set", "Item to hide", "profiles, evidence"), obj="""Place my_ev{
+        self.checkError((2, "type in set", "Item to hide", {"profiles", "evidence"}), obj="""Place my_ev{
 }""", frame="""hideEv
 my_ev""")
         
@@ -2077,8 +2091,8 @@ anc, my_other_anc""")
 {my_anc}
 {my_other_anc}""")
         
-    def test_revealFrame_normal(self):
-        self.checkFile("revealFrame normal", frame="""revealFrame
+    def test_revFrame_normal(self):
+        self.checkFile("revFrame normal", frame="""revFrame
 my_anc
 my_other_anc
 
@@ -2561,7 +2575,7 @@ askEv, sealed, all""")
 my_ev, my_anc""")
         
     def test_askEv_badobj(self):
-        self.checkError((2, "type in set", "Item to present", "profiles, evidence"), obj="""Place my_ev {
+        self.checkError((2, "type in set", "Item to present", {"profiles", "evidence"}), obj="""Place my_ev {
 }""", frame="""askEv, all, my_anc
 my_ev, my_anc""")
 
@@ -2762,7 +2776,7 @@ test""")
 fake_attr: fake_value""")
 
     def test_non_int_pause(self):
-        self.checkError((2, "int","Configuration attribute ."), macro="""CONFIG {
+        self.checkError((2, "int", "Configuration attribute ."), macro="""CONFIG {
 .: fake_value""")
         
     def test_negative_pause(self):

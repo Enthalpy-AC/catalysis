@@ -1,9 +1,12 @@
+# coding: UTF-8
+
 '''Module of auxiliary functions used by multiple library functions.'''
 
 import re
 
-from catalysis_globals import Invalid
 from functools import wraps
+
+from catalysis_globals import Invalid
 
 def expression_pack(arguments, schema, pad=False, back=""):
     '''Returns one unit. A unit is all the information needed to fill one
@@ -87,7 +90,7 @@ def expression_pack(arguments, schema, pad=False, back=""):
 def param(tup, i):
     '''Used to parse an expression_pack unit, which are in the format:
     [prefix, arg1, arg2, etc.]'''
-    return tup[0] + "=" + unicode(tup[i])
+    return tup[0] + "=" + str(tup[i])
 
 
 def no_manual(func):

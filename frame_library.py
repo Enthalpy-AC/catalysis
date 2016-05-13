@@ -1,3 +1,5 @@
+# coding: UTF-8
+
 '''A module for a class containing functions to manipulate the trial data.'''
 
 import functools
@@ -5,7 +7,7 @@ import inspect
 import re
 
 from catalysis_globals import (
-    Invalid, list_to_n_tuple, key_or_value, is_object, validate_int,
+    Invalid, list_to_n_gen, key_or_value, is_object, validate_int,
     int_at_least, find_subobject)
 from library_aux import (
     action, delay_sub, expression_pack, param, no_manual, merge_lock,
@@ -31,7 +33,7 @@ class Library(object):
         # anchor for the scene, even if no global scene anchor has been made.
         self.anc_dict = {x: {"destination": set(), "value": {}} for x in {
             "frame", "scene", "talk", "talk scene", "evidence", "profile"}}
-        for item, val in object_dict.iteritems():
+        for item, val in object_dict.items():
             if val.attribute in {"profiles", "evidence"}:
                 attr = "profile" if val.attribute == "profiles" else (
                     val.attribute)
@@ -634,7 +636,7 @@ class Library(object):
         self.scene_dia["locks"] = {
             "start": self.frame["id"], "end": 0, "hidden": hidden,
             "locks_to_display": []}
-        argv = list_to_n_tuple(
+        argv = list_to_n_gen(
             argv, 2, " plus one for hidden" if hidden else "")
         err_msg = "Arguments to sceLocks after the optional hidden"
         for index, (x_coord, y_coord) in enumerate(argv):
@@ -738,8 +740,8 @@ class Library(object):
                                   "val="+str(self.scene["id"])}}}
         self.scene["move"] = self.frame["id"]
         self.scene["end"] = self.frame["id"]
-        object_list = list_to_n_tuple(argv, 2)
-        for i, j in object_list:
+        object_gen = list_to_n_gen(argv, 2)
+        for i, j in object_gen:
             self.anc_dict["scene"]["destination"].add((
                 "scenes", self.scene["id"], "move_list",
                 len(self.scene["move_list"]), "scene_id"))
@@ -797,7 +799,7 @@ class Library(object):
         self.frame["action_parameters"] = {"multiple": {"frame": []}}
 
     @action({"type": "frame"})
-    def reveal_frame(self):
+    def rev_frame(self):
         '''Reveal a frame. Arguments are anchors.'''
         self.frame["action_name"] = "RevealFrame"
         self.frame["action_parameters"] = {"multiple": {"frame": []}}
@@ -1555,12 +1557,11 @@ class Library(object):
 
 reserved_names = set()
 method_names = set()
-for n in inspect.getmembers(Library, predicate=inspect.ismethod):
-    res_name = n[0]
+for res_name, _ in inspect.getmembers(Library, predicate=inspect.isfunction):
     # Reserve the function names in underscore and camelCase mode.
     reserved_names.add(res_name)
     reserved_names.add(
         re.sub("_(.)", lambda match: match.group(1).upper(), res_name))
     # Now add the name to the list of method names. When I get an attribute
     # of the parser, I can compare against this to check if it is a method.
-    method_names.add(n[0])
+    method_names.add(res_name)

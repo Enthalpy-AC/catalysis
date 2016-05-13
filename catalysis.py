@@ -2,27 +2,29 @@
 
 '''This module runs Catalysis by calling classes from other modules.'''
 
+import codecs
 import json
-import catalysis_globals
-import object_parser
-import macro_parser
-import frame_parser
-import upload_parser
 import sys
 import traceback
-import uploader
 
+import catalysis_globals
+import frame_parser
+import object_parser
+import macro_parser
+import uploader
+import upload_parser
+
+sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
 # If there are three argument variables, we're in test mode. Accept the data.
 try:
-    arguments = [arg.decode("utf-8") for arg in sys.argv]
-    __, macro_test, obj_test, frame_test = arguments
+    __, macro_test, obj_test, frame_test = sys.argv
     test_mode = True
 except ValueError:
     macro_test, obj_test, frame_test = False, False, False
     test_mode = False
 
-print "Beginning catalysis.\n"
+print("Beginning catalysis.\n")
 
 try:
     directory = ""
@@ -59,16 +61,15 @@ if not test_mode:
     try:
         upload_dict["trial_id"] = int(upload_dict["trial_id"])
     except ValueError:
-        print "Choosing not to upload data..."
+        print("Choosing not to upload data...")
     else:
-        print (
+        print((
             "Choosing to upload data to trial {}. Press enter to " +
-            "continue.").format(
-                upload_dict["trial_id"])
-        raw_input(
-            "Alternately, exit to abort uploading while keeping a valid " +
-            "trial file.")
+            "continue.").format(upload_dict["trial_id"]))
+        print("Or, exit to keep the file but not upload it.")
+        # Do to the codec, you need a bytestring here.
+        input()
         uploader.upload(directory, upload_dict)
 
-print "Catalysis complete!"
+print("Catalysis complete! Ignore any messages about failed script execution.")
 catalysis_globals.terminate()

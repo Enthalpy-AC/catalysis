@@ -167,14 +167,14 @@ def parse_file(directory, config_dict, obj_test):
             try:
                 parser.next_method = parser.next_method(line)
             except Invalid:
-                print sys.exc_info()[1].message.format(
-                    "line {}".format(i), file_name)
+                print(sys.exc_info()[1].message.format(
+                    "line {}".format(i), file_name))
                 terminate()
     try:
         if lines:
             parser.cleanup()
     except Invalid:
-        print sys.exc_info()[1].message.format("end of file", file_name)
+        print(sys.exc_info()[1].message.format("end of file", file_name))
         terminate()
     template = {
         "profiles": [0], "evidence": [0], "places": [0], "sounds": [0],

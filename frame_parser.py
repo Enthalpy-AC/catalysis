@@ -4,8 +4,8 @@
 
 import re
 import sys
-import Tkinter as tk
-import tkFont
+import tkinter as tk
+import tkinter.font
 
 import frame_library
 
@@ -23,7 +23,7 @@ class FrameParser(object):
                  macro_dict, config_dict):
         # Activate Tkinter, used for word wrapping.
         self.root = tk.Tk()
-        self.font = tkFont.Font(family="PW Extended", size=-12)
+        self.font = tkinter.font.Font(family="PW Extended", size=-12)
         self.next_method = self.init_frame
         self.executor = frame_library.Library(
         	   template, suffix_dicts, obj_dict, config_dict)
@@ -32,7 +32,7 @@ class FrameParser(object):
         self.line_queue = [""]
         self.macro_dict = macro_dict
         self.config_dict = config_dict
-        for punctuation in {".", "!", ",", "-", "?", u"…", ";", ":"}:
+        for punctuation in {".", "!", ",", "-", "?", "…", ";", ":"}:
             # 0's vanish.
             if self.config_dict[punctuation]:
                 self.escape_dict[punctuation] = "[#{}]".format(
@@ -239,7 +239,7 @@ class FrameParser(object):
         def recurse_and_anc_replace(json_item):
             '''Function to recurse over an iterable and perform anchor
             replacement on all scalars.'''
-            iterable = json_item.iteritems() if isinstance(
+            iterable = json_item.items() if isinstance(
                 json_item, dict) else enumerate(json_item)
             # Key is only a real key if this is a dictionary. It's an
             # index if this is a list, but the point is the same.
@@ -254,7 +254,7 @@ class FrameParser(object):
             recurse_and_anc_replace(frame["action_parameters"])
 
         # Do all anchor replacement.
-        for key, value in self.executor.anc_dict.iteritems():
+        for key, value in self.executor.anc_dict.items():
 
             def func(match):
                 '''Function that returns the entry in the proper value dict
@@ -367,7 +367,7 @@ class FrameParser(object):
                 # Ellipsis case.
                 if match.group(2) == len(match.group(2)) * "." and len(
                         match.group(2)) > 1:
-                    return match.group(2) + self.escape_dict.get(u"…", "")
+                    return match.group(2) + self.escape_dict.get("…", "")
                 else:
                     return match.group(2)
 
@@ -397,7 +397,7 @@ class FrameParser(object):
                 # ...means the first word in our loop is the last word
                 # and hence needs no pauses. found_last handles this.
                 if found_last:
-                    tag = re.sub(r'(\\)?(\.+|\\|,|-|\?|!|' + u"…" + '|;|:)',
+                    tag = re.sub(r'(\\)?(\.+|\\|,|-|\?|!|' + "…" + '|;|:)',
                                  escape, tag)
                 # The last word /could/ be null, if, say, it ends with a close
                 # tag. If so, don't mark it as the last tag. It's the word in
@@ -488,14 +488,14 @@ def parse_file(directory, template, suffix_dicts, object_dict, macro_dict,
             try:
                 parser.next_method = parser.next_method(line)
             except Invalid:
-                print sys.exc_info()[1].message.format(
-                    "line {}".format(i), file_name)
+                print(sys.exc_info()[1].message.format(
+                    "line {}".format(i), file_name))
                 parser.terminate()
     try:
         if lines:
             parser.cleanup()
     except Invalid:
-        print sys.exc_info()[1].message.format("end of file", file_name)
+        print(sys.exc_info()[1].message.format("end of file", file_name))
         parser.terminate()
 
     # Clear tkinter, even if the frame_data is blank.

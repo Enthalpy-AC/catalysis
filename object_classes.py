@@ -1,3 +1,5 @@
+# coding: UTF-8
+
 '''Module that defines all classes for objects.'''
 
 import inspect
@@ -124,15 +126,16 @@ class Profile(JSONRow):
         if not self.character_prefix:
             raise Invalid("suffix no prefix")
         suffix_list = suffix_list.split(", ")
+        sprite_names = self.sprite_suffix.keys()
         index = 0
         for tag in suffix_list:
             # If it's specifying the sprite to suffix absolutely...
             if ": " in tag:
                 sprite_long, sprite_short = tag.split(": ", 1)
-                if sprite_long in self.sprite_suffix and (
+                if sprite_long in sprite_names and (
                         re.match(r'\w+$', sprite_short)):
                     self.sprite_suffix[sprite_long] = sprite_short
-                    index = self.sprite_suffix.keys().index(sprite_long) + 1
+                    index = list(sprite_names).index(sprite_long) + 1
                 elif sprite_long in self.sprite_suffix:
                     raise Invalid("not word", "Suffix " + sprite_short)
                 else:
@@ -143,7 +146,7 @@ class Profile(JSONRow):
                     raise Invalid("not word", "Suffix")
                 # Get the object to bind to...
                 try:
-                    sprite_long = self.sprite_suffix.keys()[index]
+                    sprite_long = list(sprite_names)[index]
                 except IndexError:
                     raise Invalid("excess suffix", "Suffix " + tag)
                 # ...then bind and update the index of the "next" attribute.
@@ -162,10 +165,11 @@ class Profile(JSONRow):
             raise Invalid("prefix dupl", self.character_prefix)
 
         # Combine our lists of suffixes, to validate suffix uniqueness.
-        values_list = self.custom_suffix_list + self.sprite_suffix.values()
+        builtin_suffix_list = list(self.sprite_suffix.values())
+        suffix_list = self.custom_suffix_list + builtin_suffix_list
         # Ensure suffix uniqueness.
-        for suffix in values_list:
-            if not values_list.count(suffix) == 1:
+        for suffix in suffix_list:
+            if not suffix_list.count(suffix) == 1:
                 raise Invalid("suffix dupl", suffix)
 
         # Suffixes for custom sprites go 1, 2, 3, 4...
@@ -173,8 +177,8 @@ class Profile(JSONRow):
             suffix) + 1 for suffix in self.custom_suffix_list}
         # ...but suffixes for built-ins go -1, -2, -3, -4
         current_suffix_dict.update(
-            {suffix: - self.sprite_suffix.values().index(suffix) - 1
-             for suffix in self.sprite_suffix.values()})
+            {suffix: - suffix_list.index(suffix) - 1
+             for suffix in builtin_suffix_list})
 
         # We can now add this to the dictionary of sprites.
         self.suffix_dicts[self.character_prefix] = {

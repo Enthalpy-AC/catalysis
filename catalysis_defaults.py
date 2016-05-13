@@ -1991,7 +1991,7 @@ charDict = {
     }
 }
 
-for value in charDict.itervalues():
+for value in charDict.values():
     value["icon"] = (
         "http://aceattorney.sparklin.org/Ressources/Images/persos/" +
         value["sprite"] + ".png"
@@ -2316,7 +2316,7 @@ objectDict = {
         }
 }
 
-for obj in objectDict.itervalues():
+for obj in objectDict.values():
     obj["path"] = (
         "http://aceattorney.sparklin.org/Ressources/Images/defaultplaces/" +
         "foreground_objects/" + obj["path"] + ".gif"
@@ -3114,7 +3114,7 @@ placeDict = {
     }
 }
 
-for place in placeDict.itervalues():
+for place in placeDict.values():
     try:
         for obj in place["path"]["fgo"]:
             obj["image"] = (
@@ -4905,8 +4905,8 @@ musicDict = {}
 
 # Prepend each music track's path with its AAO directory, and add it to the
 # the real musicDict.
-for subset in temp_mus_dict.itervalues():
-    for music in subset["dict"].itervalues():
+for subset in temp_mus_dict.values():
+    for music in subset["dict"].values():
         music["path"] = subset["prepend"] + music["path"]
     musicDict.update(subset["dict"])
 

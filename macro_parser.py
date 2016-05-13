@@ -9,7 +9,6 @@ import sys
 from catalysis_globals import (
     extract_data, int_at_least, Invalid, key_or_value, quote_replace,
     terminate)
-
 from frame_library import reserved_names
 
 file_name = "/macro_data.txt"
@@ -118,14 +117,14 @@ def parse_file(directory, macro_test):
             try:
                 parser.next_method = parser.next_method(line)
             except Invalid:
-                print sys.exc_info()[1].message.format(
-                    "line {}".format(i), file_name)
+                print(sys.exc_info()[1].message.format(
+                    "line {}".format(i), file_name))
                 terminate()
     try:
         if lines:
             parser.cleanup()
     except Invalid:
-        print sys.exc_info()[1].message.format("end of file", file_name)
+        print(sys.exc_info()[1].message.format("end of file", file_name))
         terminate()
-    parser.config_dict[u"…"] = parser.config_dict.pop("...")
+    parser.config_dict["…"] = parser.config_dict.pop("...")
     return parser.macro_dict, parser.config_dict

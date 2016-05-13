@@ -1,3 +1,5 @@
+# coding: UTF-8
+
 '''Module that defines all classes for subobjects, objects within profiles,
 evidence, music, popups, places, and sounds.'''
 
@@ -59,10 +61,8 @@ class CustomSprite(JSONClass):
         self.parent_object.custom_suffix_list.append(suffix)
         self.parent_object.update_suffixes(False)
 
-class EvidenceCheck(JSONClass):
+class EvidenceCheck(JSONClass, metaclass=ABCMeta):
     '''Abstract class for a piece of evidence's suboject.'''
-
-    __metaclass__ = ABCMeta
 
     attribute = "check_button_data"
 
@@ -105,10 +105,8 @@ class Sound(EvidenceCheck):
     type_var = "sound"
 
 
-class PlaceObject(JSONClass):
+class PlaceObject(JSONClass, metaclass=ABCMeta):
     '''Abstract class to create a place's foreground or background object.'''
-
-    __metaclass__ = ABCMeta
 
     base_dict = objectDict
     colon_dict = {"name": {}, "path": {}}
