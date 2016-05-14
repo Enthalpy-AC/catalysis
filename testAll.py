@@ -876,7 +876,20 @@ Online.""")
 base: lisabasil
 }""", frame="""lb2.n:
 Online.""")
-        
+
+	def test_custom_sprite_preserves_ordering(self):
+		self.checkFile("sprite order", obj="""Profile Phoenix {
+base: phoenix
+}
+
+Phoenix sprite {
+name: smile
+still: http://i.imgur.com/kI1dHym.gif
+talk: http://i.imgur.com/kI1dHym.gif
+suffix: sm
+}""", frame="""pw.zoom:
+This should be zoom.""")
+
     def test_null_dialogue(self):
         self.checkFile("null dialogue", frame="""null:
 Online.""")

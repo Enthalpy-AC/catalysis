@@ -177,7 +177,7 @@ class Profile(JSONRow):
             suffix) + 1 for suffix in self.custom_suffix_list}
         # ...but suffixes for built-ins go -1, -2, -3, -4
         current_suffix_dict.update(
-            {suffix: - suffix_list.index(suffix) - 1
+            {suffix: - builtin_suffix_list.index(suffix) - 1
              for suffix in builtin_suffix_list})
 
         # We can now add this to the dictionary of sprites.
