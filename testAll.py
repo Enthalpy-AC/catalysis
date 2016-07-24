@@ -3,7 +3,6 @@
 import itertools
 import json
 import os
-import re
 import subprocess
 import unittest
 
@@ -16,7 +15,7 @@ class TestCase(unittest.TestCase):
     folder = ""
         
     def catalyze(self, macro, obj, frame):
-    	# Change "python3" to whatever your console uses for python 3.
+        # Change "python3" to whatever your console uses for python 3.
         return subprocess.check_output(["python3", "catalysis.py", macro, obj, frame]).decode('utf8').splitlines()[-1]
 
     def returnFile(self, filename="test_lib/testData.txt"):
@@ -26,7 +25,7 @@ class TestCase(unittest.TestCase):
             return json.loads(data)
 
     def set_to_string_set(self, entry_set):
-	    return {", ".join(j) for j in itertools.permutations(entry_set)}
+        return {", ".join(j) for j in itertools.permutations(entry_set)}
 
     def checkError(self, msg_params, macro="", obj="", frame =""):
         '''Run the program, and assert that it raised the expected error.
@@ -44,7 +43,7 @@ class TestCase(unittest.TestCase):
     def checkFile(self, filename, macro="", obj="", frame=""):
         '''Run the program, assert that it worked, and compare the result file
         with the file with name filename in the target folder.'''
-        self.assertEqual(self.catalyze(macro, obj, frame), "Catalysis complete! Ignore any messages about failed script execution.")
+        self.assertEqual(self.catalyze(macro, obj, frame), "Catalysis complete!")
         self.assertDictEqual(self.returnFile("test_lib/{}/{}.txt".format(self.folder, filename)), self.returnFile())
 
 class ObjectErrors(TestCase):
@@ -877,8 +876,8 @@ base: lisabasil
 }""", frame="""lb2.n:
 Online.""")
 
-	def test_custom_sprite_preserves_ordering(self):
-		self.checkFile("sprite order", obj="""Profile Phoenix {
+    def test_custom_sprite_preserves_ordering(self):
+        self.checkFile("sprite order", obj="""Profile Phoenix {
 base: phoenix
 }
 
@@ -2819,7 +2818,7 @@ dialogue, ‘
 path: ”
 }""", frame = """test:
 ”""")
-        
+
     def test_unauto(self):
         self.checkFile("unauto", macro="""CONFIG {
 autowrap: 

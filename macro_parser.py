@@ -65,6 +65,7 @@ class ObjectParser(object):
             return self.no_macro
         try:
             attr, value = re.split(": ?", line, maxsplit=1)
+            attr, value = attr.lower(), value.lower()
         except ValueError:
             raise Invalid("config colon")
         if attr not in self.config_dict:

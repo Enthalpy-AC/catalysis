@@ -2,7 +2,6 @@
 
 '''Generic functions used by several modules. Primarily data validation.'''
 
-import codecs
 import os
 import sys
 
@@ -19,7 +18,7 @@ class Invalid(Exception):
 def terminate():
     '''Close the program, waiting for user input if run from executable.'''
     if getattr(sys, 'frozen', False):
-        print("Press any key to continue.")
+        print("Press enter to continue.")
         # Input can't have an argument, due to the codec.
         input()
     # This must have its default value of 0 for autotesting to work.
@@ -44,11 +43,8 @@ def extract_data(file_name):
     '''Return the lines of the target file.'''
     input_file = get_file_name(file_name)
     try:
-        with open(input_file, "r", encoding="utf-8") as opened_file:
-            text = opened_file.read()
-            if text.startswith(codecs.BOM_UTF8.decode('utf8')):
-                text = text[1:]
-            return text.splitlines()
+        with open(input_file, "r", encoding="utf-8-sig") as opened_file:
+            return opened_file.read().splitlines()
     except UnicodeDecodeError:
         print(("Encoding for {} unknown. Please convert your files to UTF-8 " +
                "encoding before continuing.").format(file_name))

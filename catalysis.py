@@ -66,10 +66,10 @@ if not test_mode:
         print((
             "Choosing to upload data to trial {}. Press enter to " +
             "continue.").format(upload_dict["trial_id"]))
-        print("Or, exit to keep the file but not upload it.")
-        # Do to the codec, you need a bytestring here.
+        print("If this was not the trial ID you wanted, close Catalysis.")
+        # Due to the codec, you need a bytestring here.
         input()
         uploader.upload(directory, upload_dict)
 
-print("Catalysis complete! Ignore any messages about failed script execution.")
+print("Catalysis complete!")
 catalysis_globals.terminate()
