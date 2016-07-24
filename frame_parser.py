@@ -392,16 +392,18 @@ class FrameParser(object):
         if self.config_dict["autopause"]:
             temp_words = []
             found_last = False
+            # In old!Catalysis, mid-word punctuation would be paused.
+            # Disable this if autopause is "on," enable it for "legacy."
+            anchor = "$" if self.config_dict["autopause"] == "on" else ""
             # Loop over each word in the list, from last to first. This...
             for tag, length in reversed(words):
                 # ...means the first word in our loop is the last word
                 # and hence needs no pauses. found_last handles this.
                 if found_last:
-                    tag = re.sub(r'(\\)?(\.+|\\|,|-|\?|!|' + "…" + '|;|:)',
+                    tag = re.sub(r'(\\)?(\.+|\\|,|-|\?|!|…|;|:)' + anchor,
                                  escape, tag)
-                # The last word /could/ be null, if, say, it ends with a close
-                # tag. If so, don't mark it as the last tag. It's the word in
-                # front of it we want to pause-exempt.
+                # If the line ended in "other," a new word could have been
+                # created. Only mark found_last is we have a non-empty tag.
                 elif tag:
                     found_last = True
                 temp_words.append((tag, length))

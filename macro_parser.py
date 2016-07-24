@@ -25,10 +25,15 @@ class ObjectParser(object):
         self.active_macro = []
         self.macro_dict = {}
         self.config_dict = {
-            "autopause": True, "autowrap": True, "autoquote": True, ".": "250",
+            "autopause": "on", "autowrap": True, "autoquote": True, ".": "250",
             "!": "250", ",": "125", "-": "200", "?": "250", "...": "500",
             ";": "200", ":": "200", "startup": 0
         }
+        self.customization_dict = {
+            "autoquote": {"on": True, "off": False},
+            "autopause": {"on": "on", "legacy": "legacy", "off": False}, 
+            "autowrap": {"on": True, "off": False},
+            "startup": {"s": 0, "d": 1, "b": 2, "skip": 0, "during": 1, "before": 2}}
 
     def no_macro(self, line):
         '''Handle parsing while not inside a macro.'''
@@ -70,13 +75,9 @@ class ObjectParser(object):
             raise Invalid("config colon")
         if attr not in self.config_dict:
             raise Invalid("config attr", attr)
-        # Now we actually set the configuration attribute.
-        if attr in {"autopause", "autowrap", "autoquote"}:
-            self.config_dict[attr] = not self.config_dict[attr]
-        elif attr == "startup":
-            self.config_dict[attr] = key_or_value(value, {
-                "s": 0, "d": 1, "b": 2, "skip": 0, "during": 1, "before": 2},
-                                                  "startup macro")
+        if attr in self.customization_dict:
+            self.config_dict[attr] = key_or_value(
+                value, self.customization_dict[attr], attr)
         else:
             self.config_dict[attr] = int_at_least(
                 value, 0, "Configuration attribute " + attr)

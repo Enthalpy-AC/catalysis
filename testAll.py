@@ -2797,19 +2797,19 @@ fake_attr: fake_value""")
         
     def test_autopause(self):
         self.checkFile("autopause", macro="""CONFIG {
-autopause: 
+autopause: off
 }""", frame = """null:
 Let's not pause. That's fine, isn't it? It'll be fantastic!""")
         
     def test_autowrap(self):
         self.checkFile("autowrap", macro="""CONFIG {
-autowrap: 
+autowrap: off
 }""", frame = """null:
-Let's not pause. That's fine, isn't it? It'll be fantastic!""")
+Let's not wrap. That's fine, isn't it? It'll be fantastic!""")
         
     def test_autoquote(self):
         self.checkFile("autoquote", macro="""CONFIG {
-autoquote: 
+autoquote: off
 }
 
 test {
@@ -2821,11 +2821,27 @@ path: ”
 
     def test_unauto(self):
         self.checkFile("unauto", macro="""CONFIG {
-autowrap: 
-autowrap: 
+autowrap: off
+autowrap: on
 }""", frame = """null:
-Let's not pause. That's fine, isn't it? It'll be fantastic!""")
-        
+Let's not wrap. That's fine, isn't it? It'll be fantastic!""")
+
+    def test_legacy_pause(self):
+        self.checkFile("legacy pause", macro="""CONFIG {
+autopause: legacy
+}""", frame = """null:
+10:00""")
+
+    def test_new_pause(self):
+        self.checkFile("new pause", macro="""CONFIG {
+autopause: on
+}""", frame = """null:
+10:00""")
+		
+    def test_current_pause(self):
+        self.checkFile("current pause", frame = """null:
+10:00""")
+
     def test_0_pause(self):
         self.checkFile("0 pause", macro="""CONFIG {
 .: 0 
@@ -2851,7 +2867,7 @@ The scent of fresh lemons.... Ah.""")
 The scent of fresh lemons… Ah.""")
         
     def test_bad_startup(self):
-        self.checkError((2, "bad key", "kumquat", "startup macro"), macro="""CONFIG {
+        self.checkError((2, "bad key", "kumquat", "startup"), macro="""CONFIG {
 startup: kumquat""")
 
     def test_startup(self):
