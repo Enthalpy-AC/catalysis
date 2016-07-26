@@ -399,7 +399,8 @@ class FrameParser(object):
             for tag, length in reversed(words):
                 # ...means the first word in our loop is the last word
                 # and hence needs no pauses. found_last handles this.
-                if found_last:
+                if found_last and tag.lower() not in self.config_dict[
+                        "autoescape"]:
                     tag = re.sub(r'(\\)?(\.+|\\|,|-|\?|!|…|;|:)' + anchor,
                                  escape, tag)
                 # If the line ended in "other," a new word could have been

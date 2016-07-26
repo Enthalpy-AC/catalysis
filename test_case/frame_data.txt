@@ -45,7 +45,7 @@ jb.n:
 You looked like a promising defense attorney when I presided over one of your cases.
 
 jb:
-I was very disappointed not to have heard anything aboot you atferwards.
+I was very disappointed not to have heard anything aboot you afterwards.
 
 jb:
 I am glad to see you are still an attorney.
@@ -183,7 +183,7 @@ mono:
 
 place, aj counsel
 pwo.An:
-Knowing Gumshoe, this testmony won't be much of a problem.
+Knowing Gumshoe, this testimony won't be much of a problem.
 
 me:
 I'm more concerned about making it through this testimony without losing my composure.

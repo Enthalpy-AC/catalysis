@@ -43,4 +43,8 @@ cPos, center
 
 CONFIG {
 startup: before
+autoescape: Ms. Mrs. Mr. Dr. Prof.
+autoescape: Jan. Feb. Mar. Apr. Jun. Jul. Aug. Sep. Oct. Nov. Dec.
+autoescape: Mon. Tue. Tues. Wed. Thur. Thurs. Fri. Sat. Sun.
+autoescape: a.m. p.m. B.C. A.D. no. lb. oz.
 }

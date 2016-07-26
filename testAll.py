@@ -2837,7 +2837,7 @@ autopause: legacy
 autopause: on
 }""", frame = """null:
 10:00""")
-		
+
     def test_current_pause(self):
         self.checkFile("current pause", frame = """null:
 10:00""")
@@ -2877,6 +2877,18 @@ startup: before
 sprite:: judgebrother
 prefix:: judgebrother
 }""", frame="""jb.yes""")
+
+    def test_no_autoescape(self):
+        self.checkFile("no autoescape", macro="""CONFIG {
+autoescape: 
+}""", frame="""null:
+Mr. Wright!""")
+
+    def test_autoescape(self):
+        self.checkFile("autoescape", macro="""CONFIG {
+autoescape: Mr.
+}""", frame="""null:
+Mr. Wright!""")
 
 if __name__ == '__main__':
 

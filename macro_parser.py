@@ -27,13 +27,15 @@ class ObjectParser(object):
         self.config_dict = {
             "autopause": "on", "autowrap": True, "autoquote": True, ".": "250",
             "!": "250", ",": "125", "-": "200", "?": "250", "...": "500",
-            ";": "200", ":": "200", "startup": 0
+            ";": "200", ":": "200", "startup": 0, "autoescape": set()
         }
         self.customization_dict = {
             "autoquote": {"on": True, "off": False},
-            "autopause": {"on": "on", "legacy": "legacy", "off": False}, 
+            "autopause": {"on": "on", "legacy": "legacy", "off": False},
             "autowrap": {"on": True, "off": False},
-            "startup": {"s": 0, "d": 1, "b": 2, "skip": 0, "during": 1, "before": 2}}
+            "startup": {
+                "s": 0, "d": 1, "b": 2, "skip": 0, "during": 1, "before": 2}
+            }
 
     def no_macro(self, line):
         '''Handle parsing while not inside a macro.'''
@@ -78,6 +80,8 @@ class ObjectParser(object):
         if attr in self.customization_dict:
             self.config_dict[attr] = key_or_value(
                 value, self.customization_dict[attr], attr)
+        elif attr == "autoescape":
+            self.config_dict[attr].update(value.split())
         else:
             self.config_dict[attr] = int_at_least(
                 value, 0, "Configuration attribute " + attr)
