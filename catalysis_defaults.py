@@ -5255,7 +5255,7 @@ validation_dict = {
         "use_default": False,
         "custom": {
             "popup", "music", "sound", "place", "hide", "erase", "scroll",
-            "typeSpeed", "blip", "mirror", "color", "sync", "sup", "cPos",
+            "speed", "blip", "mirror", "color", "sync", "sup", "cPos",
             "pPos", "speakerName", "speakerId", "setSprite", "dialogue",
             "makeFrame", "contra", "anc"
         }
