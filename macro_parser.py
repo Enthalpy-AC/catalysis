@@ -11,7 +11,7 @@ from catalysis_globals import (
     terminate)
 from frame_library import reserved_names
 
-file_name = "/macro_data.txt"
+file_name = "macro_data.txt"
 
 
 class ObjectParser(object):
@@ -100,11 +100,11 @@ class ObjectParser(object):
             raise Invalid("unclosed", "Macro")
 
 
-def parse_file(directory, macro_test):
+def parse_file(macro_test):
     '''Open the file, for-loop over the lines, feed them to the parser,
     validate, and return the macros, configuration, and automation.'''
     # Careful! If macro_test == "", we stick with that.
-    lines = extract_data(directory + file_name) if macro_test is False else (
+    lines = extract_data(file_name) if macro_test is False else (
         macro_test.splitlines())
     parser = ObjectParser()
     for i, line in enumerate(lines, start=1):

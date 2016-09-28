@@ -12,7 +12,7 @@ import frame_library
 from catalysis_defaults import validation_dict
 from catalysis_globals import extract_data, Invalid, terminate, quote_replace
 
-file_name = "/frame_data.txt"
+file_name = "frame_data.txt"
 
 
 class FrameParser(object):
@@ -464,11 +464,11 @@ class FrameParser(object):
         terminate()
 
 
-def parse_file(directory, template, suffix_dicts, object_dict, macro_dict,
-               config_dict, frame_test):
+def parse_file(template, suffix_dicts, object_dict, macro_dict, config_dict,
+	              frame_test):
     '''Open the file, for-loop over the lines, feed them to the parser,
     validate, and return the trial.'''
-    lines = extract_data(directory + file_name) if frame_test is False else (
+    lines = extract_data(file_name) if frame_test is False else (
         frame_test.splitlines())
     parser = FrameParser(template, suffix_dicts, object_dict, macro_dict,
                          config_dict)

@@ -147,7 +147,7 @@ class PlaceObject(JSONClass, metaclass=ABCMeta):
         self.data["x"] = validate_int(xcoord, "x")
 
     def set_y(self, ycoord):
-        '''Propery that defines the y-coordinate.'''
+        '''Property that defines the y-coordinate.'''
         self.data["y"] = validate_int(ycoord, "y")
 
 

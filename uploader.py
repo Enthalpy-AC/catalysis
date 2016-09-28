@@ -5,7 +5,6 @@ browser.'''
 
 # Adapted from code by Ferdielance.
 
-import os
 import webbrowser
 
 from urllib.error import HTTPError
@@ -38,14 +37,14 @@ def login_aao(upload_dict):
     # "latest post", which appears on successful login.
     return TEXT_ON_SUCCESSFUL_LOGIN_PAGE in logged_in.soup.get_text()
 
-def upload_data(directory, upload_dict):
+def upload_data(upload_dict):
     '''Upload trial data once logged in.'''
     save_page = br.get(SAVE_URL)
     save_form = save_page.soup.form
     save_form.find("input", {"name": "trial_id"})['value'] = str(
     	   upload_dict["trial_id"])
 
-    file_location = get_file_name(os.path.join(directory, DATA_FILENAME))
+    file_location = get_file_name(DATA_FILENAME)
 
     with open(file_location, "r") as trial_file:
         trial_data = trial_file.read()
@@ -72,7 +71,7 @@ def open_browser(upload_dict):
     browser_controller = webbrowser.get()
     browser_controller.open(EDITOR_URL_BASE + str(upload_dict["trial_id"]))
 
-def upload(directory, upload_dict):
+def upload(upload_dict):
     '''Login, upload the data, and open the case in-editor.'''
     if not login_aao(upload_dict):
         print("Unable to login to AAO. Aborting auto-upload. Check your "
@@ -81,7 +80,7 @@ def upload(directory, upload_dict):
 
     print("Login successful.")
 
-    if upload_data(directory, upload_dict):
+    if upload_data(upload_dict):
         print("Complete! We will open the case with your default browser, "
         	     "if you are logged into AAO on it.")
         try:

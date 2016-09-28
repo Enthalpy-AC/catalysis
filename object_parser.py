@@ -11,7 +11,7 @@ import subobject_classes as sub_c
 
 from catalysis_globals import extract_data, Invalid, quote_replace, terminate
 
-file_name = "/object_data.txt"
+file_name = "object_data.txt"
 
 
 class ObjectParser(object):
@@ -144,11 +144,11 @@ class ObjectParser(object):
             raise Invalid("unclosed", "Object")
 
 
-def parse_file(directory, config_dict, obj_test):
+def parse_file(config_dict, obj_test):
     '''Open the file, for-loop over the lines, feed them to the parser,
     validate, and return the trial, suffixes, and objects with a handle.'''
     # Careful! If macro_test == "", we stick with that.
-    lines = extract_data(directory + file_name) if obj_test is False else (
+    lines = extract_data(file_name) if obj_test is False else (
         obj_test.splitlines())
     parser = ObjectParser(config_dict)
     # Escape stylized quotes with ASCII quotes if set to do so.

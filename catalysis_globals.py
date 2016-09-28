@@ -5,6 +5,11 @@
 import os
 import sys
 
+# The directory that project-specific files are located in.
+# Assumes we read the non project-specific files, set directory, then open
+# only project-specific files.
+directory = ""
+
 class Invalid(Exception):
     '''Exception that triggers upon invalid data.'''
     def __init__(self, err_code, *args):
@@ -28,10 +33,9 @@ def terminate():
 def get_file_name(file_name):
     '''Return the name of the file, making corrections for the
 	Py2Exe handling of file locations.'''
-    if getattr(sys, 'frozen', False):
-        directory = os.path.dirname(sys.executable)
-        return os.path.join(directory, file_name)
-    return file_name
+    frozen = os.path.dirname(sys.executable) if getattr(
+    	   sys, 'frozen', False) else ""
+    return os.path.join(frozen, directory, file_name)
 
 
 def quote_replace(match):
@@ -43,8 +47,8 @@ def extract_data(file_name):
     '''Return the lines of the target file.'''
     input_file = get_file_name(file_name)
     try:
-        with open(input_file, "r", encoding="utf-8-sig") as opened_file:
-            return opened_file.read().splitlines()
+        with open(input_file, "r", encoding="utf-8-sig") as f:
+            return f.read().splitlines()
     except UnicodeDecodeError:
         print(("Encoding for {} unknown. Please convert your files to UTF-8 " +
                "encoding before continuing.").format(file_name))
