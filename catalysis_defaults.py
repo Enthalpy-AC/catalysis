@@ -2967,7 +2967,7 @@ placeDict = {
     "pw court loud": {
         "name": "PW Court (Loud) ",
         "path": {
-            "image": "../defaultplaces/backgrounds/pw_court_agitated"
+            "image": "../defaultplaces/backgrounds/pw_court_agitated.gif"
         }
     },
     "pw court silent": {
@@ -3048,7 +3048,7 @@ placeDict = {
     "aj court loud": {
         "name": "AJ Court (Loud) ",
         "path": {
-            "image": "../defaultplaces/backgrounds/aj_court_agitated"
+            "image": "../defaultplaces/backgrounds/aj_court_agitated.gif"
         }
     },
     "aj court silent": {
