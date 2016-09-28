@@ -2597,331 +2597,331 @@ placeDict = {
     "prologue 1": {
         "name": "Prologue Doug On Ground",
         "path": {
-            "image": "1"
+            "image": "Ace Attorney 3/1"
         }
     },
     "prologue 2": {
         "name": "Prologue Talk (Grey)",
         "path": {
-            "image": "2"
+            "image": "Ace Attorney 3/2"
         }
     },
     "prologue 3": {
         "name": "Phoenix Phoenix Over Corpse",
         "path": {
-            "image": "3"
+            "image": "Ace Attorney 3/3"
         }
     },
     "prologue 4": {
         "name": "Phoenix Phoenix Over Corpse (Zoom)",
         "path": {
-            "image": "4"
+            "image": "Ace Attorney 3/4"
         }
     },
     "prologue 5": {
         "name": "Prologue Shove (Grey)",
         "path": {
-            "image": "5"
+            "image": "Ace Attorney 3/5"
         }
     },
     "prologue 6": {
         "name": "Prologue Finds Corpse (Grey)",
         "path": {
-            "image": "6"
+            "image": "Ace Attorney 3/6"
         }
     },
     "blue screens": {
         "name": "Blue Screens Inc",
         "path": {
-            "image": "BlueScreensInc"
+            "image": "Ace Attorney 3/BlueScreensInc"
         }
     },
     "atmey": {
         "name": "Luke Atmey's Office",
         "path": {
-            "image": "BureauAtmey"
+            "image": "Ace Attorney 3/BureauAtmey"
         }
     },
     "mask": {
         "name": "Mask DeMasque's Lair",
         "path": {
-            "image": "ChambreMask"
+            "image": "Ace Attorney 3/ChambreMask"
         }
     },
     "haza main": {
         "name": "Hazakura - Main Hall",
         "path": {
-            "image": "HazakurainBatimentPrincipal"
+            "image": "Ace Attorney 3/HazakurainBatimentPrincipal"
         }
     },
     "haza shack": {
         "name": "Hazakura - Heavenly Hall",
         "path": {
-            "image": "HazakurainCabine"
+            "image": "Ace Attorney 3/HazakurainCabine"
         }
     },
     "haza enter": {
         "name": "Hazakura - Temple Entrance",
         "path": {
-            "image": "HazakurainEntree"
+            "image": "Ace Attorney 3/HazakurainEntree"
         }
     },
     "haza court": {
         "name": "Hazakura - Courtyard",
         "path": {
-            "image": "HazakurainExterieur"
+            "image": "Ace Attorney 3/HazakurainExterieur"
         }
     },
     "haza bridge": {
         "name": "Hazakura - Bridge",
         "path": {
-            "image": "HazakurainPont"
+            "image": "Ace Attorney 3/HazakurainPont"
         }
     },
     "haza hall": {
         "name": "Hazakura - Training Hall",
         "path": {
-            "image": "HazakurainSalleEntrainement"
+            "image": "Ace Attorney 3/HazakurainSalleEntrainement"
         }
     },
     "haza inner l": {
         "name": "Hazakura - Inner (Left)",
         "path": {
-            "image": "HazakurainTempleInterieur1"
+            "image": "Ace Attorney 3/HazakurainTempleInterieur1"
         }
     },
     "haza inner r": {
         "name": "Hazakura - Inner (Right)",
         "path": {
-            "image": "HazakurainTempleInterieur2"
+            "image": "Ace Attorney 3/HazakurainTempleInterieur2"
         }
     },
     "haza garden": {
         "name": "Hazakura - Garden",
         "path": {
-            "image": "HazakurainTempleInterieurJardin"
+            "image": "Ace Attorney 3/HazakurainTempleInterieurJardin"
         }
     },
     "kb office": {
         "name": "KB Security President's Office",
         "path": {
-            "image": "KBSecurityBureauDuPresident"
+            "image": "Ace Attorney 3/KBSecurityBureauDuPresident"
         }
     },
     "kb guard": {
         "name": "KB Security Guard's Office",
         "path": {
-            "image": "KBSecuritySalleSurveillance"
+            "image": "Ace Attorney 3/KBSecuritySalleSurveillance"
         }
     },
     "lt store": {
         "name": "Lordly Tailor",
         "path": {
-            "image": "LordlyTailor"
+            "image": "Ace Attorney 3/LordlyTailor"
         }
     },
     "lt basement l": {
         "name": "Lordly Tailor Basement (Left)",
         "path": {
-            "image": "LordlyTailorBasement1"
+            "image": "Ace Attorney 3/LordlyTailorBasement1"
         }
     },
     "lt basement r": {
         "name": "Lordly Tailor Basement (Right)",
         "path": {
-            "image": "LordlyTailorBasement2"
+            "image": "Ace Attorney 3/LordlyTailorBasement2"
         }
     },
     "tres l": {
         "name": "Tres Bien (Left)",
         "path": {
-            "image": "RestaurantTresBien1"
+            "image": "Ace Attorney 3/RestaurantTresBien1"
         }
     },
     "tres r": {
         "name": "Tres Bien (Right)",
         "path": {
-            "image": "RestaurantTresBien2"
+            "image": "Ace Attorney 3/RestaurantTresBien2"
         }
     },
     "tres kitchen": {
         "name": "Tres Bien (Kitchen)",
         "path": {
-            "image": "RestaurantTresBienCuisine"
+            "image": "Ace Attorney 3/RestaurantTresBienCuisine"
         }
     },
     "vitamin park": {
         "name": "Vitamin Square",
         "path": {
-            "image": "SquareVitamine"
+            "image": "Ace Attorney 3/SquareVitamine"
         }
     },
     "loan": {
         "name": "Tender Lender",
         "path": {
-            "image": "TenderLender"
+            "image": "Ace Attorney 3/TenderLender"
         }
     },
     "waa": {
         "name": "Wright Anything Agency",
         "path": {
-            "image": "AgenceWright"
+            "image": "Ace Attorney 4/AgenceWright"
         }
     },
     "klavier": {
         "name": "Klavier's Office",
         "path": {
-            "image": "BureauGavin"
+            "image": "Ace Attorney 4/BureauGavin"
         }
     },
     "kristoph": {
         "name": "Kristoph's Cell",
         "path": {
-            "image": "CelluleGavin"
+            "image": "Ace Attorney 4/CelluleGavin"
         }
     },
     "hickfield room": {
         "name": "Hickfield Clinic Room",
         "path": {
-            "image": "CliniqueHickfield"
+            "image": "Ace Attorney 4/CliniqueHickfield"
         }
     },
     "hickfield": {
         "name": "Hickfield Clinic Lobby",
         "path": {
-            "image": "CliniqueHickfieldEntree"
+            "image": "Ace Attorney 4/CliniqueHickfieldEntree"
         }
     },
     "meraktis office": {
         "name": "Meraktis Clinic Office",
         "path": {
-            "image": "CliniqueMeraktisBureau"
+            "image": "Ace Attorney 4/CliniqueMeraktisBureau"
         }
     },
     "meraktis out": {
         "name": "Meraktis Clinic Outside",
         "path": {
-            "image": "CliniqueMeraktisEntree"
+            "image": "Ace Attorney 4/CliniqueMeraktisEntree"
         }
     },
     "meraktis garage": {
         "name": "Meraktis Clinic Garage",
         "path": {
-            "image": "CliniqueMeraktisGarage"
+            "image": "Ace Attorney 4/CliniqueMeraktisGarage"
         }
     },
     "meraktis entrance": {
         "name": "Meraktis Clinic Entrance",
         "path": {
-            "image": "CliniqueMeraktisInterieur"
+            "image": "Ace Attorney 4/CliniqueMeraktisInterieur"
         }
     },
     "borscht": {
         "name": "Borscht Bowl Club",
         "path": {
-            "image": "ClubBorscht"
+            "image": "Ace Attorney 4/ClubBorscht"
         }
     },
     "kitaki": {
         "name": "Kitaki Home",
         "path": {
-            "image": "MaisonKitaki"
+            "image": "Ace Attorney 4/MaisonKitaki"
         }
     },
     "detention aj": {
         "name": "Detention Center",
         "path": {
-            "image": "Parloir"
+            "image": "Ace Attorney 4/Parloir"
         }
     },
     "people entrance": {
         "name": "People Park Entrance",
         "path": {
-            "image": "PeopleParkEntree"
+            "image": "Ace Attorney 4/PeopleParkEntree"
         }
     },
     "people crime scene": {
         "name": "People Park Crime Scene",
         "path": {
-            "image": "PeopleParkSceneCrime"
+            "image": "Ace Attorney 4/PeopleParkSceneCrime"
         }
     },
     "coli entrance": {
         "name": "Sunshine Coliseum Entrance",
         "path": {
-            "image": "Stade"
+            "image": "Ace Attorney 4/Stade"
         }
     },
     "coli hall": {
         "name": "Sunshine Coliseum Hallway",
         "path": {
-            "image": "StadeCoulisses"
+            "image": "Ace Attorney 4/StadeCoulisses"
         }
     },
     "coli gavin": {
         "name": "Sunshine Coliseum Gavinners",
         "path": {
-            "image": "StadeLogeGavin"
+            "image": "Ace Attorney 4/StadeLogeGavin"
         }
     },
     "coli lamiroir l": {
         "name": "Sunshine Coliseum Lamiroir (Left)",
         "path": {
-            "image": "StadeLogeLamiroir1"
+            "image": "Ace Attorney 4/StadeLogeLamiroir1"
         }
     },
     "coli lamiroir r": {
         "name": "Sunshine Coliseum Lamiroir (Right)",
         "path": {
-            "image": "StadeLogeLamiroir2"
+            "image": "Ace Attorney 4/StadeLogeLamiroir2"
         }
     },
     "coli stage": {
         "name": "Sunshine Coliseum Stage",
         "path": {
-            "image": "StadeScene"
+            "image": "Ace Attorney 4/StadeScene"
         }
     },
     "eldoon": {
         "name": "Eldoon's",
         "path": {
-            "image": "StandEldoon"
+            "image": "Ace Attorney 4/StandEldoon"
         }
     },
     "drew past l": {
         "name": "Drew Studio Past (Left)",
         "path": {
-            "image": "StudioMonin1"
+            "image": "Ace Attorney 4/StudioMonin1"
         }
     },
     "drew past r": {
         "name": "Drew Studio Past (Right)",
         "path": {
-            "image": "StudioMonin2"
+            "image": "Ace Attorney 4/StudioMonin2"
         }
     },
     "drew past desk": {
         "name": "Drew Studio Past (Desk)",
         "path": {
-            "image": "StudioMoninAncien1"
+            "image": "Ace Attorney 4/StudioMoninAncien1"
         }
     },
     "drew now l": {
         "name": "Drew Studio Present (Left)",
         "path": {
-            "image": "StudioMoninAncien2"
+            "image": "Ace Attorney 4/StudioMoninAncien2"
         }
     },
     "drew now r": {
         "name": "Drew Studio Present (Right)",
         "path": {
-            "image": "StudioMoninAncienBureauVera"
+            "image": "Ace Attorney 4/StudioMoninAncienBureauVera"
         }
     },
     "drew now desk": {
         "name": "Drew Studio Present (Desk)",
         "path": {
-            "image": "StudioMoninBureauVera"
+            "image": "Ace Attorney 4/StudioMoninBureauVera"
         }
     },
     "pw bench": {
