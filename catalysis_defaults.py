@@ -1998,6 +1998,10 @@ for value in charDict.values():
     )
 
 evDict = {
+	"none": {
+		"name": "",
+		"icon": ""
+	},
     "bear": {
         "name": "Bear",
         "icon": "ours"
