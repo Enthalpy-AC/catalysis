@@ -150,9 +150,13 @@ class Library(object):
             "characters_erase_previous"]
         self.erase_override = True
 
-    def scroll(self):
+    def scroll(self, scroll_type):
         '''Established smooth scrolling.'''
-        self.frame["place_transition"] = not self.frame["place_transition"]
+        scroll_dict = {
+            "none": 0, "linear": 1, "bezier": 2, "ease_in": 3, "ease_out": 4
+        }
+        self.frame["place_transition"] = key_or_value(
+        	scroll_type, scroll_dict, "scroll type")
 
     def speed(self, type_speed):
         '''Set the type-speed from the default of one.'''

@@ -153,6 +153,7 @@ err_dict = {
     "config attr": "Configuration attribute {} is invalid.",
     "config colon": "A configuration line must have ': ' exactly once.",
     "defaults unsupported": "This (sub)object has no default values.",
+    "default no object": "Attempted to point to an object for a default place without objects.",
     "enforce scene": "Command {} can only be run in an investigation.",
     "excess press": (
         "Tried to start more press conversations than pressable statements."

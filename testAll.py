@@ -1114,11 +1114,10 @@ place, aj lobby
 as.n""")
 
     def test_scroll(self):
-        self.checkFile("scroll", frame="scroll")
+        self.checkFile("scroll", frame="scroll, bezier")
         
-    def test_unscroll(self):
-        self.checkFile("unscroll", frame="""scroll
-scroll""")
+    def test_invalid_scroll_key(self):
+        self.checkError((1, "bad key", "kumquat", "scroll type"), frame="scroll, kumquat")
         
     def test_speed(self):
         self.checkFile("speed", frame="speed, 1.5")
