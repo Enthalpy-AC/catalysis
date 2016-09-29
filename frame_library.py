@@ -156,7 +156,7 @@ class Library(object):
             "none": 0, "linear": 1, "bezier": 2, "ease_in": 3, "ease_out": 4
         }
         self.frame["place_transition"] = key_or_value(
-        	scroll_type, scroll_dict, "scroll type")
+            scroll_type, scroll_dict, "scroll type")
 
     def speed(self, type_speed):
         '''Set the type-speed from the default of one.'''
@@ -1142,7 +1142,7 @@ class Library(object):
         # Only the GUI for point expressions isn't there. We can still use
         # the actual expressions, or Endless Nine wouldn't work. No need for
         # kill_exp.
-        place = self.place_exp(place)
+        place = self.place_exp(place, allow_url=True)
         self.frame["action_parameters"]["global"].update(
             {"background": param(place, 1), "failure_dest": param(frame, 1)})
         self.frame_exp(("global", "failure_dest"))
@@ -1241,8 +1241,9 @@ class Library(object):
         return pos
 
     @no_manual
-    def place_exp(self, place, built_dict=False, kill_exp=False):
-        '''Convert a tuple represneting place from user-input to editor
+    def place_exp(self, place, built_dict=False, kill_exp=False,
+                  allow_url=False):
+        '''Convert a tuple representing place from user-input to editor
         form.'''
         def place_replace(match):
             '''Replace place keywords with the place ID as needed.'''
@@ -1265,17 +1266,23 @@ class Library(object):
             "gavel 1": -7, "gavel 3": -11
         } if built_dict == False else built_dict
 
+        # If the place isn't an expression...
         if place[0] == "val":
-            # If the place isn't an expression, seek from the defined places,
-            # then the AAO built-ins with objects.
+            # ...first, try to see if it's a known place.
             try:
                 base_place = self.from_object_dict(
                     place[1], {"places"}, "Place with object")
                 place[1] = base_place.data["id"]
-            # Check if it's an acceptable built-in place.
+                return place
             except Invalid:
-                place = ["val", key_or_value(
-                    place[1], built_dict, "place")]
+                pass
+            # ...then check if it's a default place.
+            try:
+                place[1] = key_or_value(place[1], built_dict, "place")
+            except Invalid:
+                # ...maybe it's a URL. If so, do nothing.
+                if not (allow_url and isinstance(place[1], str)):
+                    raise
         elif kill_exp:
             raise Invalid("no exp", "place")
         else:
@@ -1304,7 +1311,7 @@ class Library(object):
         elif place[1] in defaults_with_obj:
             bg_fg_obj = ("val", "foreground_objects", 1)
         else:
-        	raise Invalid("default no object")
+            raise Invalid("default no object")
 
         return place, bg_fg_obj
 
@@ -1439,7 +1446,7 @@ class Library(object):
             "aj bench": -12, "aj judge": -14, "aj det behind": -20}
         place = self.place_exp(place, built_dict)
         place, bg_fg_obj = self.bg_fg_obj_exp(
-        	bg_fg_obj, place, built_dict.values())
+            bg_fg_obj, place, built_dict.values())
         self.frame["action_parameters"]["multiple"]["object"].append({
             "place_desc": param(place, 1),
             "object_desc": {
@@ -1502,10 +1509,10 @@ class Library(object):
             prefix, place_id = self.frame["action_parameters"]["global"][
                 "background"].split("=", 1)
             built_dict = {
-				"pw bench": -2, "pw judge": -6, "pw det behind": -18,
-				"aj bench": -12, "aj judge": -14, "aj det behind": -20}
+                "pw bench": -2, "pw judge": -6, "pw det behind": -18,
+                "aj bench": -12, "aj judge": -14, "aj det behind": -20}
             _, exam = self.bg_fg_obj_exp(
-            	exam, [prefix, int(place_id)], built_dict.values())
+                exam, [prefix, int(place_id)], built_dict.values())
             exam = {"place_id": self.frame["action_parameters"]["global"][
                 "background"], "layer": param(exam, 1),
                     "id": param(exam, 2)}

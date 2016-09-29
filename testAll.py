@@ -2616,9 +2616,6 @@ anc, my_anc""")
 region, circle, 86, 28, 92, my_anc
 
 anc, my_anc""")
-
-    def test_fake_point_place(self):
-        self.checkError((1, "bad key", "kumquat", "place"), frame="point, kumquat, my_anc")
         
     def test_fake_shape(self):
         self.checkError((2, "bad shape", "kumquat"), obj="""Place New_Place {
@@ -2707,6 +2704,11 @@ anc, my_anc""")
     def test_point_object_default(self):
         self.checkFile("point object default", frame="""point, aj judge, my_anc
 object, null, my_anc
+
+anc, my_anc""")
+		
+    def test_point_object_default(self):
+        self.checkFile("point url", frame="""point, random_string, my_anc
 
 anc, my_anc""")
 
