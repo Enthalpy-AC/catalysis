@@ -48,14 +48,14 @@ class TestCase(unittest.TestCase):
 
 class ObjectErrors(TestCase):
     
-    filename = "/object_data.txt"
+    filename = "object_data.txt"
         
 class MacroErrors(TestCase):
-    filename = "/macro_data.txt"
+    filename = "macro_data.txt"
         
 class FrameErrors(TestCase):
     
-    filename = "/frame_data.txt"
+    filename = "frame_data.txt"
 
 class ObjectCoreGrammar(ObjectErrors):
 
@@ -2597,11 +2597,6 @@ my_ev, my_anc""")
 
 anc, my_anc""")
         
-    def test_point_exam_default_place(self):
-        self.checkError((1, "bad key", "black", "place"), frame="""point, black, my_anc
-
-anc, my_anc""")
-        
     def test_point_exam_polygon(self):
         self.checkFile("point exam poly", obj="""Place New_Place {
 }""", frame="""point, New_Place, my_anc
@@ -2709,14 +2704,18 @@ object, FGO, my_anc
 
 anc, my_anc""")
         
-#===============================================================================
-# TODO: Uncomment this when AAO finally supports examining built-ins.
-#     def test_point_object_default(self):
-#         self.checkFile("point object default", frame="""point, aj court, my_anc
-# object, null, my_anc
-# 
-# anc, my_anc""")
-#===============================================================================
+
+    def test_point_object_default(self):
+        self.checkFile("point object default", frame="""point, aj judge, my_anc
+object, null, my_anc
+
+anc, my_anc""")
+
+    def test_point_bad_object_default(self):
+        self.checkError((2, "default no object"), frame="""point, aj court silent, my_anc
+object, null, my_anc
+
+anc, my_anc""")
 
     def test_point_fake_object(self):
         self.checkError((2, "missing subobj", "kumquat"), obj="""Place My Place {

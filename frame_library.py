@@ -1135,12 +1135,10 @@ class Library(object):
         button is prepended to the argument list if in a scene.'''
         self.frame["action_name"] = "PointArea"
         place, frame = self.input_helper((1, 1), *argv)
-        # AAO doesn't support default places for this action yet. Remove
-        # the built_dict kwarg when that gets fixed.
         # Only the GUI for point expressions isn't there. We can still use
         # the actual expressions, or Endless Nine wouldn't work. No need for
         # kill_exp.
-        place = self.place_exp(place, built_dict={})
+        place = self.place_exp(place)
         self.frame["action_parameters"]["global"].update(
             {"background": param(place, 1), "failure_dest": param(frame, 1)})
         self.frame_exp(("global", "failure_dest"))
@@ -1282,11 +1280,9 @@ class Library(object):
         return place
 
     @no_manual
-    def bg_fg_obj_exp(self, bg_fg_obj, place, built_dict, got_id=False):
+    def bg_fg_obj_exp(self, bg_fg_obj, place, defaults_with_obj):
         '''Convert a tuple representing a background or foreground object from
         user-input to editor form.'''
-        if not got_id:
-            place = self.place_exp(place, built_dict)
         # If the object is an expression, no need to fix.
         if bg_fg_obj[0] != "val":
             return place, bg_fg_obj
@@ -1301,8 +1297,10 @@ class Library(object):
                 {"foreground_objects", "background_objects"}, active_place,
                 bg_fg_obj[1])
             bg_fg_obj = ("val", layer, sub_id)
-        else:
+        elif place[1] in defaults_with_obj:
             bg_fg_obj = ("val", "foreground_objects", 1)
+        else:
+        	raise Invalid("default no object")
 
         return place, bg_fg_obj
 
@@ -1435,7 +1433,9 @@ class Library(object):
         built_dict = {
             "pw bench": -2, "pw judge": -6, "pw det behind": -18,
             "aj bench": -12, "aj judge": -14, "aj det behind": -20}
-        place, bg_fg_obj = self.bg_fg_obj_exp(bg_fg_obj, place, built_dict)
+        place = self.place_exp(place, built_dict)
+        place, bg_fg_obj = self.bg_fg_obj_exp(
+        	bg_fg_obj, place, built_dict.values())
         self.frame["action_parameters"]["multiple"]["object"].append({
             "place_desc": param(place, 1),
             "object_desc": {
@@ -1497,8 +1497,11 @@ class Library(object):
         elif exam_type.lower() == "object":
             prefix, place_id = self.frame["action_parameters"]["global"][
                 "background"].split("=", 1)
+            built_dict = {
+				"pw bench": -2, "pw judge": -6, "pw det behind": -18,
+				"aj bench": -12, "aj judge": -14, "aj det behind": -20}
             _, exam = self.bg_fg_obj_exp(
-                exam, [prefix, int(place_id)], {}, True)
+            	exam, [prefix, int(place_id)], built_dict.values())
             exam = {"place_id": self.frame["action_parameters"]["global"][
                 "background"], "layer": param(exam, 1),
                     "id": param(exam, 2)}
