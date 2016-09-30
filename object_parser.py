@@ -169,6 +169,7 @@ def parse_file(config_dict, obj_test):
             except Invalid:
                 print(sys.exc_info()[1].message.format(
                     "line {}".format(i), file_name))
+                Invalid.err_count += 1
                 if Invalid.err_count >= Invalid.max_err:
                     terminate()
     try:

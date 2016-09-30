@@ -493,8 +493,10 @@ def parse_file(template, suffix_dicts, object_dict, macro_dict, config_dict,
             except Invalid:
                 print(sys.exc_info()[1].message.format(
                     "line {}".format(i), file_name))
+                Invalid.err_count += 1
                 if Invalid.err_count >= Invalid.max_err:
                     parser.terminate()
+
     try:
         if lines:
             parser.cleanup()

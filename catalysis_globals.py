@@ -21,7 +21,6 @@ class Invalid(Exception):
         # Escape all braces in the error code, so format doesn't break.
         err_msg = err_msg.replace("{", "{{").replace("}", "}}")
         self.message = "Error on {} of {}: " + err_msg
-        Invalid.err_count += 1
 
 
 def terminate():
