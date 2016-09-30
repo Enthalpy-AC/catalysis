@@ -26,8 +26,9 @@ class ObjectParser(object):
         self.macro_dict = {}
         self.config_dict = {
             "autopause": "on", "autowrap": True, "autoquote": True, ".": "250",
-            "!": "250", ",": "125", "-": "200", "?": "250", "...": "500",
-            ";": "200", ":": "200", "startup": 0, "autoescape": set()
+            "!": "250", ",": "125", "-": "200", "–": "200", "—": "200",
+            "?": "250", "...": "500", ";": "200", ":": "200", "startup": 0,
+            "autoescape": set()
         }
         self.customization_dict = {
             "autoquote": {"on": True, "off": False},

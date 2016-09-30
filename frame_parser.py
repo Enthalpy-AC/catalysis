@@ -32,7 +32,7 @@ class FrameParser(object):
         self.line_queue = [""]
         self.macro_dict = macro_dict
         self.config_dict = config_dict
-        for punctuation in {".", "!", ",", "-", "?", "…", ";", ":"}:
+        for punctuation in {".", "!", ",", "-", "–", "—", "?", "…", ";", ":"}:
             # 0's vanish.
             if self.config_dict[punctuation]:
                 self.escape_dict[punctuation] = "[#{}]".format(
