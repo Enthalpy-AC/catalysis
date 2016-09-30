@@ -493,12 +493,16 @@ def parse_file(template, suffix_dicts, object_dict, macro_dict, config_dict,
             except Invalid:
                 print(sys.exc_info()[1].message.format(
                     "line {}".format(i), file_name))
-                parser.terminate()
+                if Invalid.err_count >= Invalid.max_err:
+                    parser.terminate()
     try:
         if lines:
             parser.cleanup()
     except Invalid:
         print(sys.exc_info()[1].message.format("end of file", file_name))
+        parser.terminate()
+
+    if Invalid.err_count:
         parser.terminate()
 
     # Clear tkinter, even if the frame_data is blank.

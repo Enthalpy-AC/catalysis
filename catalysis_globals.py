@@ -12,12 +12,16 @@ directory = ""
 
 class Invalid(Exception):
     '''Exception that triggers upon invalid data.'''
+    max_err = 1
+    err_count = 0
+
     def __init__(self, err_code, *args):
         super(Invalid, self).__init__(err_code)
         err_msg = err_dict[err_code].format(*args)
         # Escape all braces in the error code, so format doesn't break.
         err_msg = err_msg.replace("{", "{{").replace("}", "}}")
         self.message = "Error on {} of {}: " + err_msg
+        Invalid.err_count += 1
 
 
 def terminate():
@@ -153,7 +157,9 @@ err_dict = {
     "config attr": "Configuration attribute {} is invalid.",
     "config colon": "A configuration line must have ': ' exactly once.",
     "defaults unsupported": "This (sub)object has no default values.",
-    "default no object": "Attempted to point to an object for a default place without objects.",
+    "default no object": (
+        "Attempted to point to an object for a default place without objects."
+    ),
     "enforce scene": "Command {} can only be run in an investigation.",
     "excess press": (
         "Tried to start more press conversations than pressable statements."

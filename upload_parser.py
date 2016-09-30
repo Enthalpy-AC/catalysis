@@ -13,7 +13,7 @@ def parse_file():
     '''Parses the selector file.'''
     lines = extract_data(file_name)
     try:
-        if len(lines) != 8:
+        if len(lines) != 10:
             raise Invalid("selector length")
     except Invalid:
         print(sys.exc_info()[1].message.format(
@@ -21,7 +21,8 @@ def parse_file():
         terminate()
     try:
         for i, string in enumerate([
-                "USERNAME:", "PASSWORD:", "DIRECTORY:", "TRIAL_ID:"]):
+                "USERNAME:", "PASSWORD:", "DIRECTORY:", "TRIAL_ID:",
+                "MAX_ERRORS:"]):
             if string != lines[2*i]:
                 raise Invalid("selector", string)
     except Invalid:
@@ -31,5 +32,5 @@ def parse_file():
     return lines[5], {
         "username": lines[1], "password": lines[3],
         "trial_id": lines[7]
-    }
+    }, lines[9]
 

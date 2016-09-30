@@ -169,13 +169,18 @@ def parse_file(config_dict, obj_test):
             except Invalid:
                 print(sys.exc_info()[1].message.format(
                     "line {}".format(i), file_name))
-                terminate()
+                if Invalid.err_count >= Invalid.max_err:
+                    terminate()
     try:
         if lines:
             parser.cleanup()
     except Invalid:
         print(sys.exc_info()[1].message.format("end of file", file_name))
         terminate()
+
+    if Invalid.err_count:
+        terminate()
+
     template = {
         "profiles": [0], "evidence": [0], "places": [0], "sounds": [0],
         "music": [0], "popups": [0], "cross_examinations": [0], "scenes": [0],

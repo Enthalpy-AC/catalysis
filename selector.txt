@@ -6,3 +6,5 @@ DIRECTORY:
 first_directory
 TRIAL_ID:
 trial_id_number_here
+MAX_ERRORS:
+max_errors_before_crash_here

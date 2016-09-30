@@ -30,7 +30,7 @@ try:
     if not test_mode:
         catalysis_globals.directory, upload_dict, max_err = (
          	  upload_parser.parse_file())
-        catalysis_globals.Invalid.max_err = max_err
+        catalysis_globals.Invalid.max_err = int(max_err)
     else:
         catalysis_globals.directory = "test_lib"
     macro_dict, config_dict = macro_parser.parse_file(macro_test)

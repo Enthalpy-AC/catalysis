@@ -125,12 +125,17 @@ def parse_file(macro_test):
             except Invalid:
                 print(sys.exc_info()[1].message.format(
                     "line {}".format(i), file_name))
-                terminate()
+                if Invalid.err_count >= Invalid.max_err:
+                    terminate()
     try:
         if lines:
             parser.cleanup()
     except Invalid:
         print(sys.exc_info()[1].message.format("end of file", file_name))
         terminate()
+
+    if Invalid.err_count:
+        terminate()
+
     parser.config_dict["…"] = parser.config_dict.pop("...")
     return parser.macro_dict, parser.config_dict
