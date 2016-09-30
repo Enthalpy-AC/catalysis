@@ -684,15 +684,28 @@ class Library(object):
             "end": 0, "place": place, "examine_conversations": [],
             "deduce_conversations": [], "enable_deduction": False})
         self.make_frame()
-        self.sce_exam_convo()
+        self.sce_exam_convo("dummy")
 
     @special
-    def sce_exam_convo(self, *argv):
+    def sce_exam_convo(self, exam_type, *argv):
         '''Create the examination. Takes arguments for the area. You can only
         avoid arguments for the default.'''
         if self.location == "sceExamConvo":
             self.sce_exam_end()
-            exam = self.exam_exp("val", list(argv))[1]
+            if exam_type == "region":
+                exam = self.exam_exp("val", list(argv))[1]
+            elif exam_type == "object":
+                if len(argv) != 1:
+                    raise Invalid("bad arg num", "sceExamConvo")
+                place_id = self.scene["examinations"][-1]["place"]
+                place, bg_fg_obj = self.bg_fg_obj_exp(
+                    ["val", argv[0]], ["val", int(place_id)])
+                exam = {
+					"place_id": place[1],
+					"layer": bg_fg_obj[1], "id": bg_fg_obj[2]
+                }
+            else:
+                raise Invalid("bad exam type", exam_type, "region, object")
             exam_dict = {
                 "start": self.frame["id"], "end": 0,
                 "area": exam}
@@ -1291,9 +1304,15 @@ class Library(object):
         return place
 
     @no_manual
-    def bg_fg_obj_exp(self, bg_fg_obj, place, defaults_with_obj):
+    def bg_fg_obj_exp(self, bg_fg_obj, place):
         '''Convert a tuple representing a background or foreground object from
         user-input to editor form.'''
+
+        defaults_with_obj = {
+            "pw bench": -2, "pw judge": -6, "pw det behind": -18,
+            "aj bench": -12, "aj judge": -14, "aj det behind": -20
+        }.values()
+
         # If the object is an expression, no need to fix.
         if bg_fg_obj[0] != "val":
             return place, bg_fg_obj
@@ -1445,8 +1464,7 @@ class Library(object):
             "pw bench": -2, "pw judge": -6, "pw det behind": -18,
             "aj bench": -12, "aj judge": -14, "aj det behind": -20}
         place = self.place_exp(place, built_dict)
-        place, bg_fg_obj = self.bg_fg_obj_exp(
-            bg_fg_obj, place, built_dict.values())
+        place, bg_fg_obj = self.bg_fg_obj_exp(bg_fg_obj, place)
         self.frame["action_parameters"]["multiple"]["object"].append({
             "place_desc": param(place, 1),
             "object_desc": {
@@ -1506,13 +1524,11 @@ class Library(object):
             exam = self.exam_exp(exam[0], items)
             exam = param(exam, 1)
         elif exam_type.lower() == "object":
+            if len(argv) != 3:
+                raise Invalid("bad arg num", "examination region selector")
             prefix, place_id = self.frame["action_parameters"]["global"][
                 "background"].split("=", 1)
-            built_dict = {
-                "pw bench": -2, "pw judge": -6, "pw det behind": -18,
-                "aj bench": -12, "aj judge": -14, "aj det behind": -20}
-            _, exam = self.bg_fg_obj_exp(
-                exam, [prefix, int(place_id)], built_dict.values())
+            _, exam = self.bg_fg_obj_exp(exam, [prefix, int(place_id)])
             exam = {"place_id": self.frame["action_parameters"]["global"][
                 "background"], "layer": param(exam, 1),
                     "id": param(exam, 2)}

@@ -1625,7 +1625,7 @@ sceMain
 sceTalk
 scePres
 sceExam, New_Place
-sceExamConvo, poly, 1, 15, 40, 194, 249, 137
+sceExamConvo, region, poly, 1, 15, 40, 194, 249, 137
 sceMove""")
 
     def test_sce_exam_rect(self):
@@ -1637,7 +1637,7 @@ sceMain
 sceTalk
 scePres
 sceExam, New_Place
-sceExamConvo, rect, 35, 128, 217, 182
+sceExamConvo, region, rect, 35, 128, 217, 182
 sceMove""")
         
     def test_sce_exam_circ(self):
@@ -1649,7 +1649,7 @@ sceMain
 sceTalk
 scePres
 sceExam, New_Place
-sceExamConvo, circle, 86, 28, 92
+sceExamConvo, region, circle, 86, 28, 92
 sceMove""")
         
     def test_sce_move(self):
@@ -1661,7 +1661,7 @@ sceMain, my_Scene
 sceTalk
 scePres
 sceExam, New_Place
-sceExamConvo, circle, 86, 28, 92
+sceExamConvo, region, circle, 86, 28, 92
 sceMove, my_Scene, _""")
         
     def test_sce_move_2(self):
@@ -1765,7 +1765,7 @@ sceMain
 sceTalk
 scePres
 sceExam, My_Place
-sceExamConvo, circle, 86, 28, 92:
+sceExamConvo, region, circle, 86, 28, 92:
 Have some dialogue.
 
 color, green:
@@ -1842,7 +1842,7 @@ sceMain
 sceTalk
 scePres
 sceLocks, 10, 20, 30, kumquat""")
-        
+
     def test_fake_exam_place(self):
         self.checkError((6, "bad key", "kumquat", "place"), obj="""Popup kumquat {
 }""", frame="""sceIntro
@@ -1851,7 +1851,16 @@ sceMain
 sceTalk
 scePres
 sceExam, kumquat""")
-        
+
+    def test_fake_exam_type(self):
+        self.checkError((7, "bad exam type", "kumquat", "region, object"), frame="""sceIntro
+sceMain
+
+sceTalk
+scePres
+sceExam
+sceExamConvo, kumquat""")
+
     def test_fake_shape(self):
         self.checkError((7, "bad shape", "kumquat"), obj="""Popup kumquat {
 }""", frame="""sceIntro
@@ -1860,7 +1869,7 @@ sceMain
 sceTalk
 scePres
 sceExam
-sceExamConvo, kumquat""")
+sceExamConvo, region, kumquat""")
         
     def test_poly_no_args(self):
         self.checkError((7, "poly pair"), obj="""Popup kumquat {
@@ -1870,7 +1879,7 @@ sceMain
 sceTalk
 scePres
 sceExam
-sceExamConvo, poly, 1, 2, 3, 4, 5""")
+sceExamConvo, region, poly, 1, 2, 3, 4, 5""")
         
     def test_poly_less_six(self):
         self.checkError((7, "poly 6"), frame="""sceIntro
@@ -1879,7 +1888,7 @@ sceMain
 sceTalk
 scePres
 sceExam
-sceExamConvo, poly, 1, 2, 3, 4""")
+sceExamConvo, region, poly, 1, 2, 3, 4""")
         
     def test_circ_not_3(self):
         self.checkError((7, "circle 3"), frame="""sceIntro
@@ -1888,7 +1897,7 @@ sceMain
 sceTalk
 scePres
 sceExam
-sceExamConvo, circle, 1, 2, 3, 4""")
+sceExamConvo, region, circle, 1, 2, 3, 4""")
         
     def test_rect_not_4(self):
         self.checkError((7, "rect 4"), frame="""sceIntro
@@ -1897,7 +1906,7 @@ sceMain
 sceTalk
 scePres
 sceExam
-sceExamConvo, rect, 1, 2, 3""")
+sceExamConvo, region, rect, 1, 2, 3""")
         
     def test_rect_quad_4(self):
         self.checkError((7, "rect to quad 4"), frame="""sceIntro
@@ -1906,7 +1915,7 @@ sceMain
 sceTalk
 scePres
 sceExam
-sceExamConvo, rect, 3, 4, 1, 2""")
+sceExamConvo, region, rect, 3, 4, 1, 2""")
         
     def test_rect_negative(self):
         self.checkError((7, "min", "All arguments after polygon shape", 0), frame="""sceIntro
@@ -1915,8 +1924,57 @@ sceMain
 sceTalk
 scePres
 sceExam
-sceExamConvo, rect, 1, -2, 3, 4""")
+sceExamConvo, region, rect, 1, -2, 3, 4""")
+
+    def test_exam_convo_object(self):
+        self.checkFile("exam object", obj="""Place My Place {
+}
+
+My Place foreground {
+name: FGO
+}""", frame="""sceIntro
+sceMain
+
+sceTalk
+scePres
+sceExam, My Place
+sceExamConvo, object, FGO
+sceMove
+
+anc, my_anc""")
         
+
+    def test_exam_convo_object_default(self):
+        self.checkFile("exam object default", frame="""sceIntro
+sceMain
+
+sceTalk
+scePres
+sceExam, aj judge
+sceExamConvo, object, FGO
+sceMove
+
+anc, my_anc""")
+
+    def test_exam_convo_bad_object_default(self):
+        self.checkError((7, "default no object"), frame="""sceIntro
+sceMain
+
+sceTalk
+scePres
+sceExam, aj court silent
+sceExamConvo, object, FGO""")
+
+    def test_exam_convo_fake_object(self):
+        self.checkError((7, "missing subobj", "kumquat"), obj="""Place My Place {
+}""", frame="""sceIntro
+sceMain
+
+sceTalk
+scePres
+sceExam, My Place
+sceExamConvo, object, kumquat""")
+
     def test_move(self):
         self.checkError((7, "implicit tuple", 2, "", 1, 1), frame="""sceIntro
 sceMain
@@ -2689,6 +2747,11 @@ sceExam
 sceMove
 anc, my_anc""")
 
+    def test_point_url(self):
+        self.checkFile("point url", frame="""point, random_string, my_anc
+
+anc, my_anc""")
+
     def test_point_object(self):
         self.checkFile("point object", obj="""Place My Place {
 }
@@ -2704,11 +2767,6 @@ anc, my_anc""")
     def test_point_object_default(self):
         self.checkFile("point object default", frame="""point, aj judge, my_anc
 object, null, my_anc
-
-anc, my_anc""")
-		
-    def test_point_object_default(self):
-        self.checkFile("point url", frame="""point, random_string, my_anc
 
 anc, my_anc""")
 
