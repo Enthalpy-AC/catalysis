@@ -72,7 +72,8 @@ class ObjectParser(object):
         if line == "}":
             return self.no_macro
         try:
-            attr, value = re.split(": ?", line, maxsplit=1)
+            attr, value = line.rsplit(":", maxsplit=1)
+            value = value.strip()
             attr, value = attr.lower(), value.lower()
         except ValueError:
             raise Invalid("config colon")

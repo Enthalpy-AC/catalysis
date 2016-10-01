@@ -2912,6 +2912,14 @@ Let's not pause. That's fine, isn't it? It'll be fantastic!""")
 }""", frame = """null:
 Let's not pause. That's fine, isn't it? It'll be fantastic!""")
         
+    def test_colon_pause(self):
+        self.checkFile("colon pause", macro="""CONFIG {
+,: 300
+:: 400
+}
+""", frame = """null:
+This, you see, is: a test.""")
+
     def test_four_period_pause(self):
         self.checkFile("four period", macro="""CONFIG {
 ...: 10 
