@@ -9,6 +9,7 @@ import sys
 # Assumes we read the non project-specific files, set directory, then open
 # only project-specific files.
 directory = ""
+test_mode = False
 
 class Invalid(Exception):
     '''Exception that triggers upon invalid data.'''
@@ -25,13 +26,15 @@ class Invalid(Exception):
 
 def terminate():
     '''Close the program, waiting for user input if run from executable.'''
-    if getattr(sys, 'frozen', False):
-        print("Press enter to continue.")
+    if test_mode:
+        sys.exit()
+    else:
+        print("Press enter to rerun Catalysis. Change files as desired.")
+        print("Otherwise, type something and then hit enter.")
         # Input can't have an argument, due to the codec.
-        input()
-    # This must have its default value of 0 for autotesting to work.
-    sys.exit()
-
+        do_not_repeat = input()
+        if do_not_repeat:
+            sys.exit()
 
 def get_file_name(file_name):
     '''Return the name of the file, making corrections for the
