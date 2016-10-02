@@ -29,6 +29,10 @@ def parse_file():
         print(sys.exc_info()[1].message.format(
             "line {}".format(2*i+1), file_name))
         terminate()
+    try:
+        max_err = int_at_least(lines[9], 1, "Maximum errors allowable")
+    except Invalid:
+        print(sys.exc_info()[1].message.format("line 10", file_name))
     return lines[5], {
         "username": lines[1], "password": lines[3],
         "trial_id": lines[7]

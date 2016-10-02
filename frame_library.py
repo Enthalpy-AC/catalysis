@@ -315,7 +315,8 @@ class Library(object):
             self.frame["characters"].append(char)
         if not self.camera_override:
             self.frame["place_position"] = char["position"]
-        if self.hide_if_no_place and not self.erase_override:
+        if self.hide_if_no_place and not self.frame["place"] and (
+                not self.erase_override):
             self.frame["characters_erase_previous"] = True
 
     @special
