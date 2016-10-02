@@ -46,6 +46,7 @@ class Library(object):
         self.speaker_override = False
         self.camera_override = False
         self.erase_override = False
+        self.hide_if_no_place = False
 
     @no_manual
     def check_ev(self, item):
@@ -53,6 +54,11 @@ class Library(object):
         evidence.'''
         return self.from_object_dict(
             item, {"profiles", "evidence"}, self.action_mult["bad_ev_msg"])
+
+    def autohide(self):
+        '''Toggles whether calling a new character automatically hides
+        previous characters.'''
+        self.hide_if_no_place = not self.hide_if_no_place
 
     def null(self):
         '''Dummy function to create a blank frame.'''
@@ -309,6 +315,8 @@ class Library(object):
             self.frame["characters"].append(char)
         if not self.camera_override:
             self.frame["place_position"] = char["position"]
+        if self.hide_if_no_place and not self.erase_override:
+            self.frame["characters_erase_previous"] = True
 
     @special
     def ce_start(self):

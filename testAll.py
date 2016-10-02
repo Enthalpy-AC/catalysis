@@ -1298,6 +1298,33 @@ prefix:: Phoenix
 }""", frame="""pw.yes
 set_sprite, pw, n""")
 
+    def test_sprite_hide(self):
+        self.checkFile("sprite hide", obj="""Profile My_Profile {
+sprite:: Phoenix
+prefix:: Phoenix
+}""", frame="""autohide
+pw.yes""")
+
+    def test_sprite_hide_override(self):
+        self.checkFile("sprite hide override", obj="""Profile My_Profile {
+sprite:: Phoenix
+prefix:: Phoenix
+}""", frame="""autohide
+erase
+erase
+pw.yes""")
+
+    def test_sprite_hide_place(self):
+        self.checkFile("sprite hide place", obj="""Profile My_Profile {
+sprite:: Phoenix
+prefix:: Phoenix
+}
+
+Place My_Place {
+}""", frame="""autohide
+place, My_Place
+pw.yes""")
+
     def test_make_frame(self):
         self.checkFile("manual make", frame="make_frame")
         
