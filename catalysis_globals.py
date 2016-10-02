@@ -23,6 +23,9 @@ class Invalid(Exception):
         err_msg = err_msg.replace("{", "{{").replace("}", "}}")
         self.message = "Error on {} of {}: " + err_msg
 
+class RestartSignal(Exception):
+    '''Exception that signals a restart.'''
+    pass
 
 def terminate():
     '''Close the program, waiting for user input if run from executable.'''
@@ -35,6 +38,7 @@ def terminate():
         do_not_repeat = input()
         if do_not_repeat:
             sys.exit()
+        raise RestartSignal
 
 def get_file_name(file_name):
     '''Return the name of the file, making corrections for the
@@ -138,7 +142,7 @@ err_dict = {
     "ban duplicate": "{} name {} is used twice.",
     "bad arg num": "Command {} does not have the proper number of arguments.",
     "bad context": "A command {} must be {}one of: {}.",
-    "bad exam type": "Received point command {}, instead of one of: {}.",
+    "bad exam type": "Received pointing instructions for a {}, instead of one of: {}.",
     "bad exp number": (
         "Argument {} received {} pieces of an expression instead of {}."
     ),
@@ -218,7 +222,7 @@ err_dict = {
     "poly pair": "poly needs pairs of coordinates.",
     "pre char": "There must be a character before {} can be set.",
     "pre place": "{} can only be run after a place is defined.",
-    "prefix dupl": "The suffix {} is not unique.",
+    "prefix dupl": "The prefix {} is not unique.",
     "rect 4": "rect needs 4 arguments after the shape.",
     "rect to quad 4": (
         "Arguments 4 and 5 must be greater than arguments 2 and 3, " +

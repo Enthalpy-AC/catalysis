@@ -303,6 +303,7 @@ class FrameParser(object):
         only be called in a scene. This function validates this.'''
 
         # Define variables to be used in validation.
+        # Convert the function name to camelCase.
         name = re.sub(
             "_(.)", lambda match: match.group(1).upper(), command.__name__)
         location = self.executor.location

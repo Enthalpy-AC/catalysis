@@ -77,10 +77,10 @@ class Library(object):
         self.erase_override = False
 
     @delay_sub
-    def dialogue(self, *args):
+    def dialogue(self, *argv):
         r'''Add dialogue. \ is escaped, and a terminal \ signifies a
         newline.'''
-        original_line = ", ".join(args)
+        original_line = ", ".join(argv)
         match = re.search(r"\\*$", original_line)
         if match and len(match.group(0)) % 2:
             original_line = original_line[:-1]
@@ -701,8 +701,8 @@ class Library(object):
                 place, bg_fg_obj = self.bg_fg_obj_exp(
                     ["val", argv[0]], ["val", int(place_id)])
                 exam = {
-					"place_id": place[1],
-					"layer": bg_fg_obj[1], "id": bg_fg_obj[2]
+                    "place_id": place[1],
+                    "layer": bg_fg_obj[1], "id": bg_fg_obj[2]
                 }
             else:
                 raise Invalid("bad exam type", exam_type, "region, object")
@@ -1577,7 +1577,6 @@ class Library(object):
         self.frame_exp(("multiple", "condition", len(insert), "cond_dest"))
         insert.append(
             {"expression": param(exp, 1), "cond_dest": param(frame, 1)})
-
 
     @no_manual
     def null_type(self, *argv):

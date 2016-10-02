@@ -9,6 +9,7 @@ import traceback
 
 import catalysis_globals
 import frame_parser
+import object_classes
 import object_parser
 import macro_parser
 import uploader
@@ -23,11 +24,20 @@ try:
 except ValueError:
     macro_test, obj_test, frame_test = False, False, False
 
-while True:
+def catalysis_main():
 
     print("Beginning catalysis.\n")
-    
+
+    # Reset session-dependent globals.
     catalysis_globals.directory = ""
+    catalysis_globals.Invalid.max_err = 1
+    catalysis_globals.Invalid.err_count = 0
+
+    # Reset session-dependent class variables.
+    object_classes.Profile.suffix_dicts = {}
+    for row in {"Popup", "Sound", "Music", "Place", "Evidence", "Profile"}:
+        active_obj = getattr(object_classes, row)
+        active_obj.chain = [0]
 
     try:
         if not catalysis_globals.test_mode:
@@ -43,9 +53,10 @@ while True:
             template, suffix_dicts, object_dict, macro_dict, config_dict,
             frame_test)
         json_data = json.dumps(json_data, separators=(',', ':'))
-    except SystemExit:
-        sys.exit()
-    except:
+    except catalysis_globals.RestartSignal:
+    	# A standard error has occurred. Send it up to the main loop.
+    	raise
+    except Exception:
         print(
             "Unknown error observed! Please send your documents to Enthalpy, "
             "especially err.txt, which has been automatically created."
@@ -75,7 +86,15 @@ while True:
             # Due to the codec, you need a bytestring here.
             do_not_upload = input()
             if not do_not_upload:
-                uploader.upload(upload_dict)
+                upload_manager = uploader.Uploader(upload_dict)
 
     print("Catalysis complete!")
     catalysis_globals.terminate()
+
+while True:
+	
+    try:
+        catalysis_main()
+    except catalysis_globals.RestartSignal:
+        pass
+    	
