@@ -14,9 +14,10 @@ import mechanicalsoup
 from catalysis_globals import get_file_name
 
 DATA_FILENAME = "testData.txt"
-SAVE_URL = "http://aceattorney.sparklin.org/save.php"
-LOGIN_URL = "http://aceattorney.sparklin.org/forum/ucp.php?mode=login"
-EDITOR_URL_BASE = "http://aceattorney.sparklin.org/editor.php?trial_id="
+DOMAIN = "http://aaonline.fr/"
+SAVE_URL = DOMAIN + "save.php"
+LOGIN_URL = DOMAIN + "forum/ucp.php?mode=login"
+EDITOR_URL_BASE = DOMAIN + "editor.php?trial_id="
 # This text is scanned for to check if the login is successful.
 # When accessed by MechanicalSoup, AAO assumes we want French text.
 TEXT_ON_SUCCESSFUL_LOGIN_PAGE = "Vous êtes à présent connecté"

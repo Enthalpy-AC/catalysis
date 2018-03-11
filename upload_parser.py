@@ -1,7 +1,6 @@
 # coding: UTF-8
 
-'''Module that parses the macro_data.txt file. Creates macros and handles
-configuration of Catalysis.'''
+'''Module that parses the selector.txt file, which provides instructions for case uploading.'''
 
 import sys
 
