@@ -192,6 +192,28 @@ class Library(object):
         except IndexError:
             raise Invalid("pre char", "mirror")
 
+    def appear(self, keyword):
+        '''Set the appearance effect.'''
+        appear_dict = {
+            "n": 0, "none": 0, "l": 2, "left": 2, "r": 3, "right": 3, "f": 4, "fade": 4
+        }
+        try:
+            self.frame["characters"][-1]["visual_effect_appears"] = (
+                key_or_value(keyword, appear_dict, "appearance mode"))
+        except IndexError:
+            raise Invalid("pre char", "appear")
+
+    def disappear(self, keyword):
+        '''Set the disappearance effect.'''
+        disappear_dict = {
+            "n": 0, "none": 0, "a": 1, "auto": 1, "l": 2, "left": 2, "r": 3, "right": 3, "f": 4, "fade": 4
+        }
+        try:
+            self.frame["characters"][-1]["visual_effect_disappears"] = (
+                key_or_value(keyword, disappear_dict, "disappearance mode"))
+        except IndexError:
+            raise Invalid("pre char", "disappear")
+
     def color(self, color_code):
         '''Set the color. Takes as argument the hex code or string.'''
         try:
@@ -312,10 +334,8 @@ class Library(object):
                 "profile_id": data["id"], "sprite_id": sprite_id,
                 "sync_mode": 3, "startup_mode": self.base_start,
                 "position": position, "mirror_effect": False,
-                "visual_effect_appears": 1,
-                "visual_effect_appears_mode": 0,
+                "visual_effect_appears": 0,
                 "visual_effect_disappears": 1,
-                "visual_effect_disappears_mode": 0
             }
             self.frame["characters"].append(char)
         if not self.camera_override:

@@ -1147,6 +1147,38 @@ mirror""")
     def test_mirror_bug(self):
         self.checkError((1, "pre char", "mirror"), frame="mirror")
 
+    def test_appear(self):
+        self.checkFile("appear", obj="""Profile {
+sprite:: Phoenix
+prefix:: Phoenix
+}""", frame="""pw.n
+appear, f""")
+
+    def test_appear_key_error(self):
+        self.checkError((2, "bad key", "kumquat", "appearance mode"), obj="""Profile {
+base: Phoenix
+}""", frame="""pw.n
+appear, kumquat""")
+
+    def test_appear_no_char(self):
+        self.checkError((1, "pre char", "appear"), frame="appear, n")
+
+    def test_disappear(self):
+        self.checkFile("disappear", obj="""Profile {
+sprite:: Phoenix
+prefix:: Phoenix
+}""", frame="""pw.n
+disappear, f""")
+
+    def test_disappear_key_error(self):
+        self.checkError((2, "bad key", "kumquat", "disappearance mode"), obj="""Profile {
+base: Phoenix
+}""", frame="""pw.n
+disappear, kumquat""")
+
+    def test_disappear_no_char(self):
+        self.checkError((1, "pre char", "disappear"), frame="disappear, n")
+
     def test_color_num(self):
         self.checkFile("color num", frame="color, 23A15F")
 
