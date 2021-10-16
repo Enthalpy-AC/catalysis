@@ -75,7 +75,8 @@ class Library(object):
             "characters_erase_previous": False, "popups": [],
             "action_name": "", "action_parameters": [],
             "text_colour": "white", "text_content": "", "text_speed": 1,
-            "hidden": False, "wait_time": 0, "merged_to_next": False
+            "hidden": False, "wait_time": 0, "merged_to_next": False,
+            "fade": False
         })
         self.frame = self.trial["frames"][-1]
         self.speaker_override = False
@@ -263,8 +264,8 @@ class Library(object):
 
     def speaker_id(self, speaker=""):
         '''Change the speaker ID to the ID, or null. With no argument,
-        goes to null. With ???, turn to ???. Can take an integer argument if
-        passed one by the special syntax.'''
+        goes to null. With ???, turn to ???. Could theoretically be passed
+        an int - no need to figure out which object it refers to.'''
         if not speaker:
             speaker = -3
         elif speaker == "?":
@@ -285,15 +286,19 @@ class Library(object):
                     self.trial["profiles"][speaker]["short_name"])
         self.speaker_override = True
 
-    def set_sprite(self, prefix, suffix):
-        '''Sets the sprite with the given prefix and suffix.'''
+    def set_sprite(self, prefix, suffix=False):
+        '''Sets the sprite with the given prefix and suffix.
+        If not suffix is given, no sprite is set.
+        set_character is more accurate, but the old name is kept.'''
         try:
             data = self.suffix_dicts[prefix]
         except KeyError:
             raise Invalid("unk pre", prefix)
-        try:
+        if not suffix:
+            sprite_id = 0
+        elif suffix in data["suffix dict"]:
             sprite_id = data["suffix dict"][suffix]
-        except KeyError:
+        else:
             raise Invalid("unk suff", suffix, prefix)
         if not self.speaker_override or not self.frame["place"]:
             self.frame["speaker_id"] = data["id"]
@@ -316,8 +321,26 @@ class Library(object):
         if not self.camera_override:
             self.frame["place_position"] = char["position"]
         if self.hide_if_no_place and not self.frame["place"] and (
-                not self.erase_override):
+                not self.erase_override) and sprite_id:
             self.frame["characters_erase_previous"] = True
+
+    def fade(self, fadetype, color, time, place):
+        fadetype_dict = {"in": 0, "out": 1}
+        fadetype = key_or_value(
+            fadetype, fadetype_dict, "fade type")
+        fadeplace_dict = {"bg": 0, "bgchar": 1, "nottext": 2, "all": 3}
+        place = key_or_value(
+            place, fadeplace_dict, "fade place")
+        time = int_at_least(time, 0, "Fade duration")
+        try:
+            int(color, 16)
+        except ValueError:
+            pass
+        else:
+            color = "#" + color
+
+        fade = {"fade_type": fadetype, "fade_colour": color, "fade_duration": time, "fade_placement": place}
+        self.frame["fade"] = fade
 
     @special
     def ce_start(self):

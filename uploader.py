@@ -6,6 +6,7 @@ browser.'''
 # Adapted from code by Ferdielance.
 
 import webbrowser
+import time
 
 from urllib.error import HTTPError
 
@@ -18,9 +19,6 @@ DOMAIN = "http://aaonline.fr/"
 SAVE_URL = DOMAIN + "save.php"
 LOGIN_URL = DOMAIN + "forum/ucp.php?mode=login"
 EDITOR_URL_BASE = DOMAIN + "editor.php?trial_id="
-# This text is scanned for to check if the login is successful.
-# When accessed by MechanicalSoup, AAO assumes we want French text.
-TEXT_ON_SUCCESSFUL_LOGIN_PAGE = "Vous êtes à présent connecté"
 # NOTE: Your environment PATH variable must include the path to Firefox
 # for this to work!
 
@@ -28,47 +26,39 @@ class Uploader(object):
     '''This class handles trial file upload.'''
 
     def __init__(self, upload_dict):
-        self.browser = mechanicalsoup.Browser()
+        self.browser = mechanicalsoup.StatefulBrowser()
         self.upload_dict = upload_dict
         self.upload()
 
     def login_aao(self):
-        '''Log the Mechanize browser into AAO. Because you cannot login twice,
+        '''Log the MechanicalSoup browser into AAO. Because you cannot login twice,
         this function should only be called once per session.'''
-        login_page = self.browser.get(LOGIN_URL)
-        login_form = login_page.soup.form
-        login_form.find(id="username")["value"] = self.upload_dict["username"]
-        login_form.find(id="password")["value"] = self.upload_dict["password"]
-        logged_in = self.browser.submit(login_form, LOGIN_URL)
-        # Check if the user has logged in by looking for the phrase
-        # "latest post", which appears on successful login.
-        return TEXT_ON_SUCCESSFUL_LOGIN_PAGE in logged_in.soup.get_text()
+        self.browser.open(LOGIN_URL)
+        self.browser.select_form('#login')
+        self.browser["username"] = self.upload_dict["username"]
+        self.browser["password"] = self.upload_dict["password"]
+        time.sleep(5) # PHPBB prohibits forms from being submitted as soon as they're created as a bot defense measure.
+        result_page = self.browser.submit_selected()
+        return len(result_page.soup.select("#username_logged_in")) > 0
 
     def upload_data(self):
         '''Upload trial data once logged in.'''
-        save_page = self.browser.get(SAVE_URL)
-        save_form = save_page.soup.form
-        save_form.find("input", {"name": "trial_id"})['value'] = str(
-            self.upload_dict["trial_id"])
+        self.browser.open(SAVE_URL)
+        self.browser.select_form()
+        self.browser["trial_id"] = str(self.upload_dict["trial_id"])
 
         file_location = get_file_name(DATA_FILENAME)
 
         with open(file_location, "r") as trial_file:
             trial_data = trial_file.read()
-        save_form.find("textarea", {"name": "trial_contents"}).insert(
-            0, trial_data)
-        # Fill the hidden "trial_contents_length" field. AAO automates it, but
-        # mechanize can't work with the JS, so we need to handle it manually.
-        save_form.find("input", {"name": "trial_contents_length"})[
-            "readonly"] = False
-        # Inclusion of \r could possibly create an inconsistency here.
-        # Catalysis should have purged all of these.
-        save_form.find("input", {"name": "trial_contents_length"})[
-            "value"] = len(trial_data)
-        try:
-            self.browser.submit(save_form, SAVE_URL)
+
+        self.browser["trial_contents"] = trial_data
+        self.browser["trial_contents_length"] = len(trial_data)
+        result_page = self.browser.submit_selected()
+
+        if result_page.status_code == 200:
             return True
-        except HTTPError:
+        else:
             print("Could not submit trial data. Check your trial ID.")
             return False
 

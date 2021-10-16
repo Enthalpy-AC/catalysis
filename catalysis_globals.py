@@ -201,6 +201,7 @@ err_dict = {
         "Detected characters with the same position on this frame."
     ),
     "mult contra": "Tried to make {} contradictory twice.",
+    "mult line": "Following string spans too many lines:\n{}",
     "mult pos": "Tried to use position {} twice.",
     "mult pres": "Tried to make {} presentable twice.",
     "not word": "{} may only have letters, numbers, and underscores.",
@@ -230,7 +231,7 @@ err_dict = {
     ),
     "schema fail": "Ran out of schema arguments at term {}.{}",
     "selector": "selector.txt expected this line to be {}.",
-    "selector length": "selector.txt must have eight lines.",
+    "selector length": "selector.txt must have ten lines.",
     "subobj dne": "Subobject {} not recognized.",
     "suffix dupl": "The suffix {} is not unique.",
     "suffix no prefix": "Attempted to set a suffix before setting a prefix.",

@@ -28,12 +28,13 @@ class ObjectParser(object):
             "autopause": "on", "autowrap": True, "autoquote": True, ".": "250",
             "!": "250", ",": "125", "-": "200", "–": "200", "—": "200",
             "?": "250", "...": "500", ";": "200", ":": "200", "startup": 0,
-            "autoescape": set()
+            "autoescape": set(), "threelines": True
         }
         self.customization_dict = {
             "autoquote": {"on": True, "off": False},
             "autopause": {"on": "on", "legacy": "legacy", "off": False},
             "autowrap": {"on": True, "off": False},
+            "threelines": {"on": True, "off": False},
             "startup": {
                 "s": 0, "d": 1, "b": 2, "skip": 0, "during": 1, "before": 2}
             }

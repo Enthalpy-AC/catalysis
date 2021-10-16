@@ -1,2 +1,2 @@
 //Definition//Def6
-{"places":[0,{"id":1,"name":"“","background":{"image":"","external":false,"hidden":false},"positions":[],"background_objects":[],"foreground_objects":[]}],"popups":[0],"scenes":[0],"profiles":[0],"evidence":[0],"scenes_aai":[0],"music":[0],"cross_examinations":[0],"frames":[0],"ui":{"base":"classic","elements":[]},"sounds":[0]}
+{"places":[0,{"foreground_objects":[],"name":"\u201c","positions":[],"background_objects":[],"background":{"image":"","hidden":false,"external":false},"id":1}],"popups":[0],"scenes":[0],"profiles":[0],"evidence":[0],"scenes_aai":[0],"music":[0],"cross_examinations":[0],"frames":[0],"ui":{"base":"classic","elements":[]},"sounds":[0]}

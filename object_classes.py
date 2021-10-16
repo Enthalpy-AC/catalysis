@@ -32,8 +32,7 @@ class Profile(JSONRow):
         self.data = self.chain_init({
             "long_name": "", "short_name": "", "description": "",
             "civil_status": "", "hidden": False, "base": "Inconnu", "icon": "",
-            "custom_sprites": [], "voice": -1, "auto_place_position": "",
-            "auto_place": "", "auto_colour": ""})
+            "custom_sprites": [], "voice": -1})
         self.character_prefix = False
         self.sprite_suffix = {}
         self.custom_suffix_list = []

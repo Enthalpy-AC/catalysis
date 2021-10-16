@@ -829,11 +829,6 @@ class FrameCoreSpeakerGrammar(FrameErrors):
         self.checkFile("sprite syntax", obj="""Profile {
 base: lisabasil
 }""", frame="lb2.n")
-        
-    def test_speaker_syntax(self):
-        self.checkFile("speaker syntax", obj="""Profile {
-base: lisabasil
-}""", frame="lb2")
 
     def test_speaker_spriteless(self):
         self.checkFile("speaker spriteless", obj="""Profile {
@@ -1327,9 +1322,33 @@ pw.yes""")
 
     def test_make_frame(self):
         self.checkFile("manual make", frame="make_frame")
-        
+
     def test_manual_dialogue(self):
         self.checkFile("manual dialogue", frame="dialogue, This, they say, is the end.\\\\\\")
+
+    def test_fadeBG(self):
+        self.checkFile("fade bg", frame="fade, in, black, 100, bg")
+
+    def test_fadeBGChar(self):
+        self.checkFile("fade bg char", frame="fade, out, black, 100, bgchar")
+
+    def test_fadeNotText(self):
+        self.checkFile("fade not text", frame="fade, in, ffff00, 100, nottext")
+
+    def test_fadeAll(self):
+        self.checkFile("fade all", frame="fade, in, black, 100, all")
+
+    def test_fadeNegative(self):
+        self.checkError((1, "min", "Fade duration", 0), frame="fade, in, black, -10, all")
+
+    def test_fadeNonInt(self):
+        self.checkError((1, "int", "Fade duration"), frame="fade, in, black, kumquat, all")
+
+    def test_fadeBadType(self):
+        self.checkError((1, "bad key", "kumquat", "fade type"), frame="fade, kumquat, black, 100, all")
+
+    def test_fadeBadPlace(self):
+        self.checkError((1, "bad key", "kumquat", "fade place"), frame="fade, in, black, 100, kumquat")
 
 class Cross_Examination_Tests(FrameErrors):
     

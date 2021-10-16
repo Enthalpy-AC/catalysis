@@ -186,11 +186,11 @@ class FrameParser(object):
         except AttributeError:
             raise Invalid("unk line")
         else:
-            func = self.executor.speaker_id
+            func = self.executor.set_sprite
             self.validate_context(func)
             try:
-                func(self.executor.suffix_dicts[prefix]["id"])
-            except KeyError:
+                func(prefix)
+            except Invalid:
                 raise Invalid("unk line", prefix)
 
     def comment(self, line):
@@ -349,13 +349,17 @@ class FrameParser(object):
         the program. Please do not make any changes without understanding
         the operation of the entire function.'''
 
+        def symbol_length(symbol):
+            if symbol not in self.glyph_dict:
+                self.glyph_dict[symbol] = self.font.measure(symbol)
+            return self.glyph_dict[symbol]
+
         def get_length(text):
             '''Function that returns length for a string. Used only for a word
             or sequence of spaces. Subpixel rendering causes inconsistent
             pixel counts across machines if more than one character is
             measured at a time.'''
-            return sum([self.glyph_dict.setdefault(
-                n, self.font.measure(n)) for n in text])
+            return sum(symbol_length(n) for n in text)
 
         def escape(match):
             '''Handles pausing and escape characters. group(1) is the optional
@@ -452,6 +456,10 @@ class FrameParser(object):
         target_index = self.executor.frame["id"]
         frames = self.executor.trial["frames"]
 
+        # Check for four-liners...
+        if self.config_dict["threelines"] and "".join(frame_text).count("\n") >= 3:
+           raise Invalid("mult line", "".join(frame_text))
+
         # And finally load each segment into frames, starting from the last.
         while frame_text:
             frames[target_index]["text_content"] += frame_text.pop()
@@ -477,26 +485,34 @@ def parse_file(template, suffix_dicts, object_dict, macro_dict, config_dict,
     if parser.config_dict["autoquote"]:
         lines = [re.sub("‘|’|“|”", quote_replace, line) for line in lines]
     for i, line in enumerate(lines, start=1):
-        if not line:
-            # A blank line means to expect a new frame.
-            parser.next_method = parser.blank()
-        elif line.startswith("//") and parser.next_method == parser.init_frame:
-            # Ignore single-line comments.
-            pass
-        elif line.startswith("/*") and parser.next_method == parser.init_frame:
-            # Mutliline comments trigger the comment state, but in case it's
-            # a one-line multiline comment, call to comment.
-            parser.next_method = parser.comment(line)
-        else:
-            # If all else fails, go with whatever the current state is.
-            try:
+        try:
+            if not line:
+                # A blank line means to expect a new frame.
+                parser.next_method = parser.blank()
+            elif line.startswith("//") and parser.next_method == parser.init_frame:
+                # Ignore single-line comments.
+                pass
+            elif line.startswith("/*") and parser.next_method == parser.init_frame:
+                # Mutliline comments trigger the comment state, but in case it's
+                # a one-line multiline comment, call to comment.
+                parser.next_method = parser.comment(line)
+            else:
+                # If all else fails, go with whatever the current state is.
                 parser.next_method = parser.next_method(line)
-            except Invalid:
-                print(sys.exc_info()[1].message.format(
-                    "line {}".format(i), file_name))
-                Invalid.err_count += 1
-                if Invalid.err_count >= Invalid.max_err:
-                    parser.terminate()
+        except Invalid:
+            print(sys.exc_info()[1].message.format(
+                "line {}".format(i), file_name))
+            # The error skipping system means that when a function runs, we miss
+            # the ability to get the next function returned. Either error skipping
+            # or the "next_method" idea needs to be rewritten. Probably both.
+            if parser.next_method == parser.dialogue:
+                parser.next_method = parser.init_frame
+                # Reset the line queue, so we don't try to rewrap words that...
+                #...already are giving us problems.
+                parser.line_queue = [""]
+            Invalid.err_count += 1
+            if Invalid.err_count >= Invalid.max_err:
+                parser.terminate()
 
     try:
         if lines:
